@@ -5,66 +5,111 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { C, tex, force, box, dot, floor, jp, figure, JS } from '../tools/draw.mjs';
 import { figA, figD } from '../tools/figures.mjs';
-import { page, sub, head, op, eq, p, note, check, fig } from '../tools/answer.mjs';
+import { page, qa, head, op, eq, p, check, fig } from '../tools/answer.mjs';
 
 // (1) P が受ける力(重力・垂直抗力・動摩擦力)。速さの情報は描かない。
 // 作用点: mg は重心、N と μ'N は接触面。重なって見えないよう、N は重力から横にずらす。
 const figForce = () => {
-  let s = floor(80, 240, 140) + jp(88, 166, 'Q の上面', { size: JS });
-  s += box(140, 100, 40, 40) + tex(120, 98, 'm', { anchor: 'end' });
-  s += force(160, 120, 160, 196) + dot(160, 120);       // mg: 重心から
-  s += force(174, 140, 174, 56) + dot(174, 140);        // N: 接触面から
-  s += force(146, 140, 78, 140) + dot(146, 140);        // μ'N: 接触面から(P は Q に対して右へすべるので左向き)
-  s += tex(186, 70, 'N', { color: C.force }) + tex(170, 200, 'mg', { color: C.force }) + tex(112, 128, "\\mu' N", { anchor: 'middle', color: C.force });
-  return figure(230, 180, `<g transform="translate(-45,-40)">${s}</g>`);   // 余白を切り詰めて図を大きく見せる
+  let s = floor(70, 250, 140) + jp(78, 168, 'Q の上面', { size: JS });
+  s += box(132, 84, 56, 56) + tex(206, 104, 'm');                       // P(質量 m)
+  s += force(160, 112, 160, 196) + dot(160, 112);                        // mg: 重心から
+  s += force(178, 140, 178, 40) + dot(178, 140);                         // N: 接触面から(重力からずらす)
+  s += force(146, 140, 56, 140) + dot(146, 140);                         // μ'N: 接触面から(左向き)
+  s += tex(190, 56, 'N', { color: C.force }) + tex(172, 204, 'mg', { color: C.force }) + tex(100, 126, "\\mu' N", { anchor: 'middle', color: C.force });
+  return figure(260, 192, `<g transform="translate(-30,-24)">${s}</g>`);
 };
 
+const choice = (c) => `<div class="eq"><span class="th">∴</span><span class="f"><b>${c}</b> .</span></div>`;
+
 const body = [
-  sub('(1)', fig(figForce(), { cap: 'P が受ける力(重力は重心、垂直抗力・摩擦力は接触面から)' }),
-    head('鉛直方向の力のつりあい'),
-    eq('0 = N - mg'),
-    eq('N = mg\\ .', { ther: true })),
+  qa('(1)', {
+    genshou: [fig(figForce(), { cap: 'P が受ける力(重力は重心、垂直抗力・摩擦力は接触面から)' }),
+      p('P は Q の上面をすべる。鉛直方向には動かない.')],
+    kaihou: p('鉛直方向の力のつりあい.'),
+    tate: [head('鉛直方向の力のつりあい'), eq('0 = N - mg')],
+    keisan: '—',
+    ans: eq('N = mg\\ .', { ther: true }),
+    gimmi: p('$N > 0$。すべっていても、鉛直方向の力はつりあう.'),
+  }),
 
-  sub('(2)',
-    head('動摩擦力'),
-    eq("f = \\mu' N = \\mu' m g\\ .")),
+  qa('(2)', {
+    genshou: p('P は Q に対して右へすべるので、動摩擦力がはたらく.'),
+    kaihou: p("動摩擦力の式 $f = \\mu' N$ に (1) の $N$ を代入する."),
+    tate: [head('動摩擦力'), eq("f = \\mu' N")],
+    keisan: eq("f = \\mu' m g"),
+    ans: eq("f = \\mu' m g\\ .", { ther: true }),
+    gimmi: p('向きは P の運動と逆(P には左向き)。Q には右向きに同じ大きさがはたらく.'),
+  }),
 
-  sub('(3)',
-    p('P, Q の水平方向には外力がはたらかない(床はなめらか)ので、運動量の和は保存する.'),
-    p('動摩擦力(非保存力)が仕事をするので、力学的エネルギーの和は保存しない.'),
-    eq('\\text{ウ}\\ .', { ther: true })),
+  qa('(3)', {
+    genshou: p('P と Q が一体になるまで(状態1 → 状態2)の運動。外力の有無と、非保存力の仕事の有無を調べる.'),
+    kaihou: p('運動量は外力の和が 0 のとき保存し、力学的エネルギーは保存力のみが仕事をするとき保存する.'),
+    tate: [p('水平方向:床はなめらかで外力なし → 運動量の和は保存する.'),
+      p('動摩擦力(非保存力)が仕事をする → 力学的エネルギーの和は保存しない.')],
+    keisan: '—',
+    ans: choice('ウ'),
+    gimmi: p('摩擦で熱が出る分だけ、力学的エネルギーは減る.'),
+  }),
 
-  sub('(4)', fig(figA({ states: ['状態1', '状態2'] }), { cap: '状態1(P が Q に乗った直後)と状態2(一体)。右向きを正とする' }),
-    head('力積と運動量の関係', '右向きを正'),
-    eq('\\mathrm{P}:\\ m v_1 - m v_0 = -\\mu\' m g\\, t_1', { no: '①' }),
-    eq('\\mathrm{Q}:\\ 4m v_1 - 4m\\cdot 0 = +\\mu\' m g\\, t_1', { no: '②' })),
+  qa('(4)', {
+    genshou: [fig(figA({ states: ['状態1', '状態2'] }), { cap: '状態1(P が Q に乗った直後)と状態2(一体)。右向きを正とする' }),
+      p('状態1 から状態2 まで、P は減速し、Q は加速する.')],
+    kaihou: p('P、Q それぞれに、力積と運動量の関係を立てる(動摩擦力は一定).'),
+    tate: [head('力積と運動量の関係', '右向きを正'),
+      eq("\\mathrm{P}:\\ m v_1 - m v_0 = -\\mu' m g\\, t_1", { no: '①' }),
+      eq("\\mathrm{Q}:\\ 4m v_1 - 4m\\cdot 0 = +\\mu' m g\\, t_1", { no: '②' })],
+    keisan: '—',
+    ans: p('①, ②.'),
+    gimmi: p('P は左向き、Q は右向きに力積を受ける。符号が逆で、大きさが等しい.'),
+  }),
 
-  sub('(5)',
-    op('①+② より $t_1$ を消去して'),
-    eq('5m v_1 - m v_0 = 0'),
-    eq('v_1 = \\frac{v_0}{5}\\ .', { ther: true })),
+  qa('(5)', {
+    genshou: p('①, ② には $t_1$ が含まれる.'),
+    kaihou: p('2式の和をとり、$t_1$ を消去する.'),
+    tate: p('①, ②.'),
+    keisan: [op('①+② より $t_1$ を消去して'), eq('5m v_1 - m v_0 = 0')],
+    ans: eq('v_1 = \\frac{v_0}{5}\\ .', { ther: true }),
+    gimmi: p('$0 < v_1 < v_0$。運動量保存($m v_0 = 5m v_1$)から求めた値と一致する.'),
+  }),
 
-  sub('(6)',
-    op('② に $v_1$ を代入して'),
-    eq("\\frac{4}{5} m v_0 = \\mu' m g\\, t_1"),
-    eq("t_1 = \\frac{4 v_0}{5\\mu' g}\\ .", { ther: true })),
+  qa('(6)', {
+    genshou: p('(5) で $v_1$ が求まったので、①か② に代入すれば $t_1$ が求まる.'),
+    kaihou: p('② に $v_1$ を代入する.'),
+    tate: p('②.'),
+    keisan: [op('② に $v_1$ を代入して'), eq("\\frac{4}{5} m v_0 = \\mu' m g\\, t_1")],
+    ans: eq("t_1 = \\frac{4 v_0}{5\\mu' g}\\ .", { ther: true }),
+    gimmi: p('$t_1 > 0$。$\\mu\'$ が大きい(摩擦が大きい)ほど $t_1$ は短い.'),
+  }),
 
-  sub('(7)',
-    head('仕事とエネルギーの関係', '右向きを正'),
-    eq("\\mathrm{P}:\\ \\frac{1}{2} m v_1^{2} - \\frac{1}{2} m v_0^{2} = -\\mu' m g\\, x_P", { no: '③' }),
-    eq("\\mathrm{Q}:\\ \\frac{1}{2}(4m) v_1^{2} - 0 = +\\mu' m g\\, x_Q", { no: '④' })),
+  qa('(7)', {
+    genshou: p('P、Q はそれぞれ動摩擦力による仕事を受ける。移動距離は $x_P$、$x_Q$.'),
+    kaihou: p('P、Q それぞれに、仕事とエネルギーの関係を立てる.'),
+    tate: [head('仕事とエネルギーの関係', '右向きを正'),
+      eq("\\mathrm{P}:\\ \\frac{1}{2} m v_1^{2} - \\frac{1}{2} m v_0^{2} = -\\mu' m g\\, x_P", { no: '③' }),
+      eq("\\mathrm{Q}:\\ \\frac{1}{2}(4m) v_1^{2} - 0 = +\\mu' m g\\, x_Q", { no: '④' })],
+    keisan: '—',
+    ans: p('③, ④.'),
+    gimmi: p('P は負の仕事(減速)、Q は正の仕事(加速).'),
+  }),
 
-  sub('(8)',
-    op('③ に $v_1 = \\frac{v_0}{5}$ を代入して'),
-    eq("\\frac{1}{2} m \\cdot \\frac{24}{25} v_0^{2} = \\mu' m g\\, x_P"),
-    eq("x_P = \\frac{12 v_0^{2}}{25\\mu' g}\\ .", { ther: true })),
+  qa('(8)', {
+    genshou: p('③ は $x_P$ と $v_1$ だけを含む。(5) で $v_1$ が分かっている.'),
+    kaihou: p('③ に $v_1 = \\frac{v_0}{5}$ を代入する.'),
+    tate: p('③.'),
+    keisan: [op('③ に $v_1 = \\frac{v_0}{5}$ を代入して'), eq("\\frac{1}{2} m \\cdot \\frac{24}{25} v_0^{2} = \\mu' m g\\, x_P")],
+    ans: eq("x_P = \\frac{12 v_0^{2}}{25\\mu' g}\\ .", { ther: true }),
+    gimmi: p('$x_P > 0$。次の (9) で、$x_P - x_Q$ と照らして確かめる.'),
+  }),
 
-  sub('(9)', fig(figD({ names: ['\\mathrm{P}', '\\mathrm{Q}'] }), { cap: 'P は減速($v_0\\to v_1$)、Q は加速($0\\to v_1$)' }),
-    head('$v$-$t$ グラフの斜線部の面積より'),
-    p('斜線部は、Q に対する P の移動距離 $\\ell$ を表す.'),
-    eq('\\ell = \\frac{1}{2} v_0 t_1\\ .'),
-    note("(6) の $t_1$ を代入すると $\\ell = \\frac{2 v_0^{2}}{5\\mu' g}$ ."),
-    check("④ より $x_Q = \\frac{2 v_1^{2}}{\\mu' g} = \\frac{2 v_0^{2}}{25\\mu' g}$。$x_P - x_Q = \\frac{12 - 2}{25}\\cdot\\frac{v_0^{2}}{\\mu' g} = \\frac{2 v_0^{2}}{5\\mu' g}$ で $\\ell$ と一致する.")),
+  qa('(9)', {
+    genshou: [fig(figD({ names: ['\\mathrm{P}', '\\mathrm{Q}'] }), { cap: 'P は減速($v_0 \\to v_1$)、Q は加速($0 \\to v_1$)' }),
+      p('求めるのは、Q 上を P が動いた距離 $\\ell$(Q に対する P の移動距離).')],
+    kaihou: p('$v$-$t$ グラフの斜線部の面積は、P と Q の移動距離の差、つまり $\\ell$ を表す.'),
+    tate: [head('$v$-$t$ グラフの面積'), p('斜線部は、底辺 $t_1$、高さ $v_0$ の三角形.')],
+    keisan: eq('\\ell = \\frac{1}{2} v_0 t_1'),
+    ans: eq('\\ell = \\frac{1}{2} v_0 t_1\\ .', { ther: true }),
+    gimmi: check("④ より $x_Q = \\frac{2 v_1^{2}}{\\mu' g} = \\frac{2 v_0^{2}}{25\\mu' g}$。$x_P - x_Q = \\frac{12 - 2}{25}\\cdot\\frac{v_0^{2}}{\\mu' g} = \\frac{2 v_0^{2}}{5\\mu' g}$。これは (6) の $t_1$ を代入した $\\ell = \\frac{1}{2} v_0 t_1 = \\frac{2 v_0^{2}}{5\\mu' g}$ と一致する."),
+  }),
 ].join('\n');
 
 const html = page({

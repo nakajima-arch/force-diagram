@@ -33,6 +33,16 @@ export const check = (s) => `<div class="check"><span class="mk">吟味</span>${
 export const sub = (label, ...parts) =>
   `<section class="q"><div class="lab">${label}</div><div class="body">${parts.flat().join('\n')}</div></section>`;
 
+/** 項目(現象理解・解法・立式・計算・答・吟味 のどれか) */
+export const step = (name, ...parts) =>
+  `<div class="step"><div class="sl">${name}</div><div class="sb">${parts.flat().join('\n')}</div></div>`;
+
+/** 小問を6項目で書く。o = { genshou, kaihou, tate, keisan, ans, gimmi, note }  各値は HTML の配列(または文字列) */
+export const qa = (label, o) => sub(label,
+  step('現象理解', o.genshou ?? '—'), step('解法', o.kaihou ?? '—'), step('立式', o.tate ?? '—'),
+  step('計算', o.keisan ?? '—'), step('答', o.ans ?? '—'), step('吟味', o.gimmi ?? '—'),
+  o.note ?? '');
+
 /** 図(SVG 文字列)を置く。cap は図の説明。表示幅は viewBox の幅 × --k。--k = 本文の文字 ÷ 図の文字(22) なので、図の記号が本文と同じ大きさに見える */
 export const fig = (svg, { cap = '' } = {}) => {
   const vb = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
@@ -41,7 +51,7 @@ export const fig = (svg, { cap = '' } = {}) => {
 };
 
 /** ページ全体 */
-export function page({ title, lead = '', body, layout = 'two' }) {
+export function page({ title, lead = '', body, layout = 'one' }) {
   return `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
@@ -56,7 +66,11 @@ h1{font-size:18px;margin:0 0 4px}
 .q{display:flow-root;position:relative;padding:10px 0 10px 3.6em;border-top:1px solid var(--rule)}
 .eq,figure,.note,.check,.op,p{break-inside:avoid}.head{break-after:avoid}
 .lab{position:absolute;left:0;top:10px;width:3.3em;font-weight:700}
-.head{margin:8px 0 2px}
+.step{display:flex;gap:.8em;margin:.3em 0}
+.step>.sl{flex:0 0 4.8em;font-weight:700;color:#555}
+.step>.sb{flex:1;min-width:0}
+.step .eq,.step p{margin-left:0}
+.head{margin:2px 0 2px}
 .head:first-child{margin-top:0}
 .def{margin-left:.2em}
 .op{margin:6px 0 0}
@@ -76,14 +90,14 @@ p{margin:.35em 0 .35em .8em}
 @media (min-width:1100px){main[data-layout=two]{max-width:1240px;column-count:2;column-gap:32px;column-rule:1px solid var(--ink)}
  main[data-layout=two] h1,main[data-layout=two] .lead{column-span:all}}
 @media print{
- @page{size:A4 landscape;margin:9mm}
- :root{--k:.523}
- body{font-size:11.5px;line-height:1.42}
+ @page{size:${layout === 'two' ? 'A4 landscape' : 'A4 portrait'};margin:${layout === 'two' ? '9mm' : '12mm'}}
+ :root{--k:${layout === 'two' ? '.523' : '.545'}}
+ body{font-size:${layout === 'two' ? '11.5px' : '12px'};line-height:1.45}
  main,main[data-layout]{max-width:none;padding:0}
  main[data-layout=two]{column-count:2;column-gap:10mm;column-rule:1px solid #000}
  main[data-layout=two] h1,main[data-layout=two] .lead{column-span:all}
  h1{font-size:15px}.lead{margin-bottom:6px}
- .q{padding:3px 0 3px 3.6em}.lab{top:3px}.eq{margin:.1em 0 .1em .6em}.op{margin-top:2px}.head{margin:4px 0 1px}figure{margin:2px 0 3px}.note,.check{margin:.35em 0 .15em .8em;padding:.15em .6em}p{margin:.2em 0 .2em .8em}
+ .q{padding:4px 0 4px 3.6em;${layout === 'two' ? '' : 'break-inside:avoid;'}}.step{margin:.2em 0}.lab{top:3px}.eq{margin:.1em 0 .1em .6em}.op{margin-top:2px}.head{margin:4px 0 1px}figure{margin:2px 0 3px}.note,.check{margin:.35em 0 .15em .8em;padding:.15em .6em}p{margin:.2em 0 .2em .8em}
 }
 </style></head><body><main data-print data-layout="${layout}">
 <h1>${esc(title)}</h1>
