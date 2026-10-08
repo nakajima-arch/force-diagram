@@ -11,7 +11,7 @@ export function rich(s) {
 
 /** 式を1行。no は式番号(①など)。ther=true で行頭に ∴ */
 export const eq = (tex, { no = '', ther = false } = {}) =>
-  `<div class="eq">${ther ? '<span class="th">∴</span>' : ''}<span class="f">${mathHtml(tex)}</span>${no ? `<span class="no">…${no}</span>` : ''}</div>`;
+  `<div class="eq">${ther ? '<span class="th">∴</span>' : ''}<span class="f">${mathHtml('\\displaystyle ' + tex)}</span>${no ? `<span class="no">…${no}</span>` : ''}</div>`;
 
 /** 見出し(法則名)。note は括弧内の記号の定義 */
 export const head = (name, note = '') =>
@@ -33,9 +33,12 @@ export const check = (s) => `<div class="check"><span class="mk">吟味</span>${
 export const sub = (label, ...parts) =>
   `<section class="q"><div class="lab">${label}</div><div class="body">${parts.flat().join('\n')}</div></section>`;
 
-/** 図(SVG 文字列)を置く。cap は図の説明 */
-export const fig = (svg, { cap = '', width = null } = {}) =>
-  `<figure${width ? ` style="max-width:${width}px"` : ''}>${svg.replace(/<\?xml[^>]*>/, '')}${cap ? `<figcaption>${rich(cap)}</figcaption>` : ''}</figure>`;
+/** 図(SVG 文字列)を置く。cap は図の説明。表示幅は viewBox の幅 × 0.8 に固定(図ごとに文字の大きさがちがって見えないように) */
+export const fig = (svg, { cap = '' } = {}) => {
+  const vb = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+  const w = vb ? Math.round(parseFloat(vb[1]) * 0.8) : 600;
+  return `<figure>${svg.replace(/<svg ([^>]*)>/, `<svg $1 style="width:${w}px">`)}${cap ? `<figcaption>${rich(cap)}</figcaption>` : ''}</figure>`;
+};
 
 /** ページ全体 */
 export function page({ title, lead = '', body }) {
@@ -49,24 +52,24 @@ export function page({ title, lead = '', body }) {
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","IPAGothic",sans-serif;line-height:1.7;font-size:16px}
 main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:18px;margin:0 0 4px}
-.lead{font-size:13px;color:#555;margin:0 0 18px}
+.lead{color:#555;margin:0 0 18px}
 .q{display:grid;grid-template-columns:3.4em 1fr;gap:0 12px;padding:14px 0;border-top:1px solid var(--rule)}
 .lab{font-weight:700;font-size:18px}
-.head{margin:10px 0 2px;display:inline-block;border-bottom:2px solid var(--ink);padding:0 2px}
+.head{margin:10px 0 2px}
 .head:first-child{margin-top:0}
-.def{font-size:.9em;margin-left:.2em}
-.op{margin:8px 0 0;font-size:.95em}
+.def{margin-left:.2em}
+.op{margin:8px 0 0}
 .eq{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .5em;margin:.35em 0 .35em .8em}
 .eq .th{margin-left:.2em}
-.eq .no{margin-left:.4em;font-size:.95em}
+.eq .no{margin-left:.4em}
 svg.m{display:inline-block;overflow:visible}
 figure{margin:6px 0 10px;padding:0}
-figure>svg{width:100%;height:auto;display:block;background:#fff;border:1px solid var(--rule);border-radius:4px}
-figcaption{font-size:12px;color:#555;margin-top:2px}
+figure>svg{max-width:100%;height:auto;display:block;background:#fff;border:1px solid var(--rule);border-radius:4px}
+figcaption{color:#555;margin-top:2px}
 p{margin:.4em 0 .4em .8em}
-.note{margin:.7em 0 .3em .8em;padding:.3em .7em;border:1px dashed #999;border-radius:4px;font-size:.93em}
+.note{margin:.7em 0 .3em .8em;padding:.3em .7em;border:1px dashed #999;border-radius:4px}
 .note .mk,.check .mk{font-weight:700;margin-right:.5em}
-.check{margin:.7em 0 .3em .8em;padding:.3em .7em;border-left:4px solid var(--a);font-size:.93em}
+.check{margin:.7em 0 .3em .8em;padding:.3em .7em;border-left:4px solid var(--a)}
 .check .mk{color:var(--a)}
 @media print{@page{size:A4;margin:12mm}body{font-size:12.5px}main{padding:0}.q{break-inside:avoid}}
 </style></head><body><main data-print>

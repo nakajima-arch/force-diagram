@@ -3,33 +3,29 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { C, tex, arrow, force, box, dot, jp, figure } from '../tools/draw.mjs';
+import { tex, force, box, dot, floor, jp, figure, JS } from '../tools/draw.mjs';
 import { figA, figD } from '../tools/figures.mjs';
 import { page, sub, head, op, eq, p, note, check, fig } from '../tools/answer.mjs';
 
-// (1)(2) P が Q の上をすべるとき P が受ける力。作用点: mg は重心、N と μ'N は接触面。
+// (1) P が受ける力。鉛直方向のつりあいだけなので、速さの情報は描かない。
+// 作用点: mg は重心、N は接触面。重なって見えないよう、N は重力から横にずらして描く。
 const figForce = () => {
-  let s = box(60, 140, 200, 36);                       // Q
-  s += jp(28, 164, '止', { size: 20 }) + tex(222, 166, '4m', { size: 22 });
-  s += box(140, 100, 40, 40) + tex(120, 98, 'm', { size: 22, anchor: 'end' });   // P
-  s += arrow(188, 118, 244, 118, { w: 2 }) + tex(252, 126, 'v_0', { size: 22 });
+  let s = floor(80, 240, 140) + jp(88, 166, 'Q の上面', { size: JS });
+  s += box(140, 100, 40, 40) + tex(120, 98, 'm', { anchor: 'end' });
   s += force(160, 120, 160, 196) + dot(160, 120);       // mg: 重心から
-  s += force(160, 140, 160, 56) + dot(160, 140);        // N: 接触面から
-  s += force(160, 140, 84, 140);                        // μ'N: 接触面から(P は右へすべるので左向き)
-  s += tex(172, 70, 'N', { size: 24 }) + tex(172, 204, 'mg', { size: 24 });
-  s += tex(76, 128, "\\mu' N", { size: 24, anchor: 'middle' });
-  s += jp(16, 24, '右向きを正とする.', { size: 14 });
+  s += force(174, 140, 174, 56) + dot(174, 140);        // N: 接触面から
+  s += tex(186, 70, 'N') + tex(170, 200, 'mg');
   return figure(320, 220, s);
 };
 
 const body = [
-  sub('(1)', fig(figForce(), { width: 340, cap: 'P が受ける力(作用点: 重力=重心、$N$・$\\mu\'N$=接触面)' }),
-    head('鉛直方向の力のつりあい', '$N$:垂直抗力'),
+  sub('(1)', fig(figForce(), { cap: 'P が受ける力(重力は重心、垂直抗力は接触面から)' }),
+    head('鉛直方向の力のつりあい'),
     eq('0 = N - mg'),
     eq('N = mg\\ .', { ther: true })),
 
   sub('(2)',
-    head('動摩擦力', "$\\mu'$:動摩擦係数"),
+    head('動摩擦力'),
     eq("f = \\mu' N = \\mu' m g\\ .")),
 
   sub('(3)',
@@ -62,7 +58,7 @@ const body = [
     eq("\\frac{1}{2} m \\cdot \\frac{24}{25} v_0^{2} = \\mu' m g\\, x_P"),
     eq("x_P = \\frac{12 v_0^{2}}{25\\mu' g}\\ .", { ther: true })),
 
-  sub('(9)', fig(figD({ names: ['\\mathrm{P}', '\\mathrm{Q}'] }), { width: 380, cap: 'P は減速($v_0\\to v_1$)、Q は加速($0\\to v_1$)' }),
+  sub('(9)', fig(figD({ names: ['\\mathrm{P}', '\\mathrm{Q}'] }), { cap: 'P は減速($v_0\\to v_1$)、Q は加速($0\\to v_1$)' }),
     head('$v$-$t$ グラフの斜線部の面積より'),
     p('斜線部は、Q に対する P の移動距離 $\\ell$ を表す.'),
     eq('\\ell = \\frac{1}{2} v_0 t_1\\ .'),

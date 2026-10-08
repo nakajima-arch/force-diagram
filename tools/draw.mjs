@@ -18,6 +18,10 @@ export const C = {
   wall: '#555555',    // 床・壁
 };
 
+// ---- 文字の大きさ(図の中は全部この2つに統一) ----
+export const FS = 22;   // 数式・記号
+export const JS = 16;   // 日本語
+
 // ---- 数式 ----
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
@@ -27,7 +31,7 @@ const mj = mathjax.document('', {
 });
 
 /** TeX を入れ子の <svg> にして返す。(x,y) は文字の基線上の位置。anchor: start | middle | end */
-export function tex(x, y, src, { size = 22, color = C.ink, anchor = 'start' } = {}) {
+export function tex(x, y, src, { size = FS, color = C.ink, anchor = 'start' } = {}) {
   const html = adaptor.innerHTML(mj.convert(src, { display: false }));
   const m = (re) => html.match(re);
   const w = parseFloat(m(/width="([\d.]+)ex"/)[1]);
@@ -109,10 +113,10 @@ export function dim(x1, x2, y, { gap = null, tick = 13, color = C.ink, endTick =
 }
 
 /** 状態ラベル(t=0 など) */
-export const stateLabel = (x, y, src) => tex(x, y, src, { size: 30, color: C.label, anchor: 'middle' });
+export const stateLabel = (x, y, src) => tex(x, y, src, { size: FS, color: C.label, anchor: 'middle' });
 
 /** 日本語の短い文字 */
-export const jp = (x, y, s, { size = 18, color = C.ink, anchor = 'start' } = {}) =>
+export const jp = (x, y, s, { size = JS, color = C.ink, anchor = 'start' } = {}) =>
   `<text x="${x}" y="${y}" font-size="${size}" fill="${color}" text-anchor="${anchor}" font-family="'Hiragino Sans','Noto Sans JP','IPAGothic',sans-serif">${s}</text>`;
 
 /** 円弧(角度の表示)。中心 (cx,cy)、半径 rad、角度は数学向き(度、反時計回りが正) a1→a2 */
@@ -139,7 +143,7 @@ export const figure = (w, h, body, { bg = true } = {}) =>
   (bg ? `<rect width="${w}" height="${h}" fill="#fff"/>` : '') + body + '</svg>\n';
 
 /** 文章の中に置く数式(インライン)。TeX を <svg> にして返す。基線は文字にそろう */
-export function mathHtml(src, { size = 19, color = null, display = false } = {}) {
+export function mathHtml(src, { color = null } = {}) {
   const html = adaptor.innerHTML(mj.convert(src, { display: false }));
   const m = (re) => html.match(re);
   const w = parseFloat(m(/width="([\d.]+)ex"/)[1]);
@@ -147,7 +151,7 @@ export function mathHtml(src, { size = 19, color = null, display = false } = {})
   const va = parseFloat((m(/vertical-align:\s*(-?[\d.]+)ex/) || [0, '0'])[1]);
   const viewBox = m(/viewBox="([^"]+)"/)[1];
   const inner = html.slice(html.indexOf('>', html.indexOf('<svg')) + 1, html.lastIndexOf('</svg>'));
-  const ex = size / 2;
+  const e = (n) => r(n / 2) + 'em';        // 1em = 2ex。本文と同じ大きさで並ぶ
   const col = color ? `color:${color};` : '';
-  return `<svg class="m" xmlns="http://www.w3.org/2000/svg" width="${r(w * ex)}" height="${r(h * ex)}" viewBox="${viewBox}" style="vertical-align:${r(va * ex)}px;${col}" fill="currentColor" role="img" aria-label="${src.replace(/"/g, '&quot;')}">${inner}</svg>`;
+  return `<svg class="m" xmlns="http://www.w3.org/2000/svg" width="${e(w)}" height="${e(h)}" viewBox="${viewBox}" style="vertical-align:${e(va)};${col}" fill="currentColor" role="img" aria-label="${src.replace(/"/g, '&quot;')}">${inner}</svg>`;
 }
