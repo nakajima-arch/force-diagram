@@ -1,0 +1,17 @@
+{
+  "name": "force-diagram",
+  "version": "1.0.0",
+  "description": "力の図示ドリル + 中島テンプレ(物理の記述答案・図の作図)",
+  "main": "data.js",
+  "scripts": {
+    "figures": "node tools/build-figures.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nakajima-arch/force-diagram.git"
+  },
+  "devDependencies": {
+    "mathjax-full": "^3.2.1"
+  },
+  "type": "module"
+}
