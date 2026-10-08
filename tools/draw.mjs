@@ -10,8 +10,8 @@ import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
 export const C = {
   ink: '#111111',     // 速さ・長さ・軸・文字
   force: '#E69F00',   // 力(オレンジ)。原本でも力はオレンジ
-  compA: '#D55E00',   // 分解した成分1(原本の赤。朱にして見やすく)
-  compB: '#0072B2',   // 分解した成分2(原本の青)
+  compA: '#D55E00',   // 分解成分: 注目方向(斜面沿い・向心方向など)。原本の赤を朱に
+  compB: '#0072B2',   // 分解成分: それに垂直な方向。原本の青
   inertia: '#D55E00', // 慣性力(見かけの力)。原本では赤
   target: '#009E73',  // 求める量
   label: '#0072B2',   // 状態ラベル(t=0 など)
