@@ -137,3 +137,17 @@ export function hatch(points, { color = C.target, gap = 9, id = 'h' } = {}) {
 export const figure = (w, h, body, { bg = true } = {}) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">` +
   (bg ? `<rect width="${w}" height="${h}" fill="#fff"/>` : '') + body + '</svg>\n';
+
+/** 文章の中に置く数式(インライン)。TeX を <svg> にして返す。基線は文字にそろう */
+export function mathHtml(src, { size = 19, color = null, display = false } = {}) {
+  const html = adaptor.innerHTML(mj.convert(src, { display: false }));
+  const m = (re) => html.match(re);
+  const w = parseFloat(m(/width="([\d.]+)ex"/)[1]);
+  const h = parseFloat(m(/height="([\d.]+)ex"/)[1]);
+  const va = parseFloat((m(/vertical-align:\s*(-?[\d.]+)ex/) || [0, '0'])[1]);
+  const viewBox = m(/viewBox="([^"]+)"/)[1];
+  const inner = html.slice(html.indexOf('>', html.indexOf('<svg')) + 1, html.lastIndexOf('</svg>'));
+  const ex = size / 2;
+  const col = color ? `color:${color};` : '';
+  return `<svg class="m" xmlns="http://www.w3.org/2000/svg" width="${r(w * ex)}" height="${r(h * ex)}" viewBox="${viewBox}" style="vertical-align:${r(va * ex)}px;${col}" fill="currentColor" role="img" aria-label="${src.replace(/"/g, '&quot;')}">${inner}</svg>`;
+}

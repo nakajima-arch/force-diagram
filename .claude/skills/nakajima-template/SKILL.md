@@ -65,9 +65,18 @@ description: 物理(力学)の問題に対して、中島先生の型で記述�
 - 赤字で一言添える(HTML では `.check` クラス)。
 
 ## 4. 出力
-- HTML 1枚(`answers/<名前>.html`)。図は `figures/` の SVG を埋め込む。数式は MathJax で図形化したものを使い、フォントに依存させない。
-- 図の描き方: `figures.md`。部品: `tools/draw.mjs`。見本: `figures/index.html`。
-- Word が必要な場合は、HTML から図を画像で書き出して貼る。数式エディタ(OMML)が必要なら別途 docx を作る。
+答案は HTML 1枚 + PDF(A4)。数式は MathJax で図形化して埋め込む(フォントに依存しない)。
+
+作り方(見本: `answers/2026-sample-4.mjs`):
+1. `answers/<名前>.mjs` を作り、`tools/answer.mjs` の部品で本文を組む。
+   `sub('(1)', fig(svg), head('運動方程式','$N$:垂直抗力'), eq('ma = F'), eq('a = …\\ .', {ther:true}), op('①+② より $t_1$ を消去して'), note('…'), check('…'))`
+   - `head` 法則名の見出し / `eq` 式(`no:'①'` で式番号、`ther:true` で ∴)/ `op` 操作の一言 / `p` 文章
+   - `note` 補足(※、別記) / `check` 吟味 / 文中の数式は `$...$`
+2. 図は `tools/figures.mjs` の関数(`figA` 前後の図、`figB` 力の図示、`figC` 斜め衝突、`figD` v-t グラフ)か、問題用に `tools/draw.mjs` の部品で新しく描く。作用点は `figures.md` の表に従う。
+3. `node answers/<名前>.mjs` で HTML を作り、chromium で確認する:
+   `headless_shell --no-sandbox --print-to-pdf=<出力>.pdf --no-pdf-header-footer file://…`
+   図とPDFは必ず目で見て、文字の重なり・矢印の根元・数式の崩れを直す。
+4. 原本(先生の答案)があれば並べて比べ、式の粒度・見出し・操作の一言を合わせる。
 
 ## 5. 不確かなときは
 推測で埋めずに、先生に聞く。特に:
