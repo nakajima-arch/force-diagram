@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { tex, force, box, dot, floor, jp, figure, JS } from '../tools/draw.mjs';
+import { C, tex, force, box, dot, floor, jp, figure, JS } from '../tools/draw.mjs';
 import { figA, figD } from '../tools/figures.mjs';
 import { page, sub, head, op, eq, p, note, check, fig } from '../tools/answer.mjs';
 
@@ -15,7 +15,7 @@ const figForce = () => {
   s += force(160, 120, 160, 196) + dot(160, 120);       // mg: 重心から
   s += force(174, 140, 174, 56) + dot(174, 140);        // N: 接触面から
   s += force(146, 140, 78, 140) + dot(146, 140);        // μ'N: 接触面から(P は Q に対して右へすべるので左向き)
-  s += tex(186, 70, 'N') + tex(170, 200, 'mg') + tex(112, 128, "\\mu' N", { anchor: 'middle' });
+  s += tex(186, 70, 'N', { color: C.force }) + tex(170, 200, 'mg', { color: C.force }) + tex(112, 128, "\\mu' N", { anchor: 'middle', color: C.force });
   return figure(230, 180, `<g transform="translate(-45,-40)">${s}</g>`);   // 余白を切り詰めて図を大きく見せる
 };
 

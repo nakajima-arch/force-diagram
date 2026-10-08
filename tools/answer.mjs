@@ -64,7 +64,7 @@ h1{font-size:18px;margin:0 0 4px}
 .eq .no{margin-left:.4em}
 svg.m{display:inline-block;overflow:visible}
 figure{margin:4px 0 8px;padding:0}
-figure>svg{max-width:100%;height:auto;display:block;background:#fff;border:1px solid var(--rule);border-radius:4px}
+figure>svg{max-width:100%;height:auto;display:block}
 figcaption{color:#555;margin-top:2px}
 p{margin:.35em 0 .35em .8em}
 .note{margin:.6em 0 .3em .8em;padding:.25em .7em;border:1px dashed #999;border-radius:4px}

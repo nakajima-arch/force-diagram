@@ -54,7 +54,7 @@ export const figB = (o = {}) => {
   s += force(160, 120, 160, 200) + dot(160, 120);
   s += force(174, 140, 174, 44) + dot(174, 140);   // N は重力と重ならないよう、接触面上で右にずらす
   s += force(160, 140, 80, 140);
-  s += tex(186, 56, 'N', { size: 22 }) + tex(168, 196, 'mg', { size: 22 }) + tex(70, 126, '\\mu N', { size: 22, anchor: 'middle' });
+  s += tex(186, 56, 'N', { size: 22, color: C.force }) + tex(168, 196, 'mg', { size: 22, color: C.force }) + tex(70, 126, '\\mu N', { size: 22, anchor: 'middle', color: C.force });
   s += arrow(196, 120, 246, 120, { w: 1.8 });      // 運動の向き(力ではないので黒・細く)
   s += jp(196, 108, '運動の向き', { size: 16 });
   s += accel(150, 76, 96, 76) + tex(123, 66, 'a', { size: 22, color: C.force, anchor: 'middle' });   // 減速するので加速度は左向き
