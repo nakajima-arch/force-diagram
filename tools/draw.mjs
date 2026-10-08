@@ -155,3 +155,16 @@ export function mathHtml(src, { color = null } = {}) {
   const col = color ? `color:${color};` : '';
   return `<svg class="m" xmlns="http://www.w3.org/2000/svg" width="${e(w)}" height="${e(h)}" viewBox="${viewBox}" style="vertical-align:${e(va)};${col}" fill="currentColor" role="img" aria-label="${src.replace(/"/g, '&quot;')}">${inner}</svg>`;
 }
+
+/** 折れ線・曲線(点列をなめらかにつなぐ代わりに細かく刻んだ折れ線) */
+export const curve = (pts, { color = C.ink, w = 2.2, dash = null } = {}) =>
+  `<path d="M${pts.map((p) => `${r(p[0])},${r(p[1])}`).join(' L')}" stroke="${color}" stroke-width="${w}" fill="none" stroke-linejoin="round" stroke-linecap="round"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`;
+
+/** 円(惑星・仮想の球など) */
+export const circ = (cx, cy, rad, { color = C.ink, w = 2.2, dash = null, fill = '#fff' } = {}) =>
+  `<circle cx="${cx}" cy="${cy}" r="${rad}" fill="${fill}" stroke="${color}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ''}/>`;
+
+/** たての寸法線(長さの表示)。x の位置で y1 から y2 へ。両端に横棒 */
+export function vdim(x, y1, y2, { color = C.ink, tick = 12 } = {}) {
+  return line(x - tick / 2, y1, x + tick / 2, y1, { color }) + line(x - tick / 2, y2, x + tick / 2, y2, { color }) + line(x, y1, x, y2, { color });
+}

@@ -9,8 +9,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans",
 main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:18px;margin:0 0 4px}
 .lead{color:#555;margin:0 0 14px}
-.q{display:grid;grid-template-columns:3em 1fr;gap:0 10px;padding:10px 0;border-top:1px solid var(--rule);break-inside:avoid}
-.lab{font-weight:700}
+.q{display:flow-root;position:relative;padding:10px 0 10px 3.6em;border-top:1px solid var(--rule)}
+.eq,figure,.note,.check,.op,p{break-inside:avoid}.head{break-after:avoid}
+.lab{position:absolute;left:0;top:10px;width:3.3em;font-weight:700}
 .head{margin:8px 0 2px}
 .head:first-child{margin-top:0}
 .def{margin-left:.2em}
@@ -38,7 +39,7 @@ p{margin:.35em 0 .35em .8em}
  main[data-layout=two]{column-count:2;column-gap:10mm;column-rule:1px solid #000}
  main[data-layout=two] h1,main[data-layout=two] .lead{column-span:all}
  h1{font-size:15px}.lead{margin-bottom:6px}
- .q{padding:3px 0}.eq{margin:.1em 0 .1em .6em}.op{margin-top:2px}.head{margin:4px 0 1px}figure{margin:2px 0 3px}.note,.check{margin:.35em 0 .15em .8em;padding:.15em .6em}p{margin:.2em 0 .2em .8em}
+ .q{padding:3px 0 3px 3.6em}.lab{top:3px}.eq{margin:.1em 0 .1em .6em}.op{margin-top:2px}.head{margin:4px 0 1px}figure{margin:2px 0 3px}.note,.check{margin:.35em 0 .15em .8em;padding:.15em .6em}p{margin:.2em 0 .2em .8em}
 }
 </style></head><body><main data-print data-layout="two">
 <h1>2026年度サンプル 大問4  P が Q の上をすべる運動</h1>
