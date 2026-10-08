@@ -82,7 +82,7 @@ const body = [
   qa('(1) ア', {
     genshou: [fig(fig1(), { cap: '状態①(表面)から状態②(高さ $h$)まで' }),
       p('小球は表面(状態①、速さ $v$)から高さ $h$(状態②)まで上がる。重力以外の力ははたらかない.')],
-    kaihou: p(T`エネルギー保存則。万有引力による位置エネルギーは $-\frac{GMm}{r}$(無限遠が基準).`),
+    kaihou: p(T`[[大気の抵抗の影響は無視できる]] → はたらく力は万有引力(保存力)だけ → エネルギー保存則。万有引力による位置エネルギーは $-\frac{GMm}{r}$(無限遠が基準).`),
     tate: [head('エネルギー保存則', '$v_h$:高さ $h$ での速さ'),
       eq(T`\frac12 mv^2 - \frac{GMm}{R} = \frac12 mv_h^2 - \frac{GMm}{R+h}`)],
     keisan: eq(T`v_h^2 = v^2 - 2GM\left(\frac1R - \frac1{R+h}\right) = v^2 - \frac{2GMh}{R(R+h)}`),
@@ -92,7 +92,7 @@ const body = [
 
   qa('イ', {
     genshou: p('最も高い点では、速さが 0 になる.'),
-    kaihou: p('(ア) の式で $v_h = 0$、$h = H$($H$:最高点の表面からの距離)とおく.'),
+    kaihou: p('[[小球が惑星表面から最も離れていたときの距離]] → 最高点では速さ 0。(ア) の式で $v_h = 0$、$h = H$($H$:最高点の表面からの距離)とおく.'),
     tate: eq(T`0 = v^2 - \frac{2GMH}{R(R+H)}`),
     keisan: [eq(T`v^2 R(R+H) = 2GMH`), eq(T`H\,(2GM - v^2R) = v^2R^2`)],
     ans: [eq(T`H = \frac{v^2R^2}{2GM - v^2R}`, { ther: true }), choice('④')],
@@ -101,7 +101,7 @@ const body = [
 
   qa('ウ', {
     genshou: p('戻ってこない = 最高点が有限の位置にならない.'),
-    kaihou: p('(イ) の $H$ が有限にならない条件を考える(分母が 0 以下).'),
+    kaihou: p('[[じゅうぶんに時間が経過しても小球が惑星表面に戻ってこない]] → 最高点がない。(イ) の $H$ が有限にならない条件を考える(分母が 0 以下).'),
     tate: eq(T`2GM - v^2R \le 0`),
     keisan: eq(T`v^2 \ge \frac{2GM}{R}`),
     ans: [eq(T`v \ge \sqrt{\frac{2GM}{R}}`, { ther: true }), choice('④')],
@@ -111,7 +111,7 @@ const body = [
   qa('(2)(a) エ オ', {
     genshou: [fig(fig2(), { cap: '半径 $r$ の球(質量 $M_r$)と、小球が受ける万有引力 $F$' }),
       p('惑星は一様な密度。半径 $r$ の球の質量 $M_r$ を考える.')],
-    kaihou: p('$r \\ge R$ では惑星全体。$r < R$ では質量は体積に比例する.'),
+    kaihou: p('[[一様な球]] → 密度が一定。$r < R$ では質量は体積に比例し、$r \\ge R$ では惑星全体の質量.'),
     tate: eq(T`M_r : M = \frac43\pi r^3 : \frac43\pi R^3 \quad (r < R)`),
     keisan: eq(T`M_r = M\,\frac{r^3}{R^3}`),
     ans: [p('$r \\ge R$:$M_r = M$'), choice('⓪ (エ)'), p(T`$r < R$:$M_r = M\frac{r^3}{R^3}$`), choice('③ (オ)')],
@@ -120,7 +120,7 @@ const body = [
 
   qa('カ', {
     genshou: [fig(fig3(), { cap: '左:$M_r$、右:$F$' }), p('$M_r$ を $r$ の関数としてグラフにする.')],
-    kaihou: p('(エ)(オ) の式の形から概形を読み取る.'),
+    kaihou: p('[[$r$ の関数としてグラフに表す]] → (エ)(オ) の式の形から概形を読み取る.'),
     tate: eq(T`M_r = \begin{cases} M\,\frac{r^3}{R^3} & (r < R)\\ M & (r \ge R) \end{cases}`),
     keisan: p('$r^3$ に比例して 0 から増え、$r = R$ で $M$ に達する.'),
     ans: choice('⓪'),
@@ -129,7 +129,7 @@ const body = [
 
   qa('キ ク ケ', {
     genshou: p('O から距離 $r$ の小球が、惑星から受ける万有引力 $F$. $M_r$ が中心 $\\mathrm{O}$ に集まったとみなせる.'),
-    kaihou: p('万有引力の法則を、$r \\ge R$ と $r < R$ に分けて使う.'),
+    kaihou: p('[[質量 $M_r$ が惑星の中心位置 $\\mathrm{O}$ に集まったとした場合に小球にはたらく万有引力と同じ]] → 万有引力の法則を、$r \\ge R$ と $r < R$ に分けて使う.'),
     tate: [head('万有引力の法則'), eq(T`F = G\,\frac{m M_r}{r^2}`)],
     keisan: [p('$r \\ge R$ ($M_r = M$)'), eq(T`F = G\,\frac{mM}{r^2}`),
       p(T`$r < R$ ($M_r = M\frac{r^3}{R^3}$)`), eq(T`F = G\,\frac{m}{r^2}\cdot M\frac{r^3}{R^3} = G\,\frac{mM}{R^3}\,r`)],
@@ -140,7 +140,7 @@ const body = [
   qa('(b) コ', {
     genshou: [fig(fig4(), { cap: '$x$:$\\mathrm{O}$ から A の向きを正とする' }),
       p('小球は A で静止して出発する。力は常に $\\mathrm{O}$ を向く.')],
-    kaihou: p('運動方程式を立て、$a = -\\omega^2 x$ の形なら単振動.'),
+    kaihou: p('[[運動方程式からトンネル内部における小球は]] → 運動方程式を立て、$a = -\\omega^2 x$ の形なら単振動.'),
     tate: [head('運動方程式', '$x$:$\\mathrm{O}$ から A の向きの位置、$a$:加速度'), eq(T`ma = -G\,\frac{mM}{R^3}\,x`)],
     keisan: [eq(T`a = -\frac{GM}{R^3}\,x`), eq(T`\omega = \sqrt{\frac{GM}{R^3}}`)],
     ans: [p('$a = -\\omega^2 x$ の形なので、単振動.'), choice('⓪')],
@@ -149,7 +149,7 @@ const body = [
 
   qa('サ', {
     genshou: p('A で静止して始まるので、A は振動の端。振幅は $R$、中心は $\\mathrm{O}$。B は反対の端で、A から B までは半周期.'),
-    kaihou: p(T`単振動の周期 $T = \frac{2\pi}{\omega}$.`),
+    kaihou: p(T`[[点 A から静かに落下]] → A は振動の端。[[点 B に初めて到達するまでにかかる時間]] → 半周期。単振動の周期は $T = \frac{2\pi}{\omega}$.`),
     tate: eq(T`t = \frac T2 = \frac{\pi}{\omega}`),
     keisan: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`),
     ans: [eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`, { ther: true }), choice('⓪')],
@@ -158,7 +158,7 @@ const body = [
 
   qa('シ', {
     genshou: p('A で静止した小球が、中心から距離 $r$ の位置にきたときの速さ $v$.'),
-    kaihou: p(T`エネルギー保存則。復元力 $-kx$ ($k = \frac{GMm}{R^3}$) の位置エネルギーは $\frac12 kx^2$.`),
+    kaihou: p(T`[[中心からの距離 $r$ の位置にある小球の速さ]] → エネルギー保存則。復元力 $-kx$ ($k = \frac{GMm}{R^3}$) の位置エネルギーは $\frac12 kx^2$.`),
     tate: [head('エネルギー保存則', '中心 $\\mathrm{O}$ が基準'),
       eq(T`\frac12 mv^2 + \frac12\cdot\frac{GMm}{R^3}\,r^2 = 0 + \frac12\cdot\frac{GMm}{R^3}\,R^2`)],
     keisan: eq(T`v^2 = \frac{GM}{R^3}\,(R^2 - r^2)`),
@@ -169,7 +169,7 @@ const body = [
 
   qa('ス', {
     genshou: p('具体的な惑星の数値で、A から B までの時間を求める.'),
-    kaihou: p('(サ) の式に数値を代入する.'),
+    kaihou: p('[[点 A から静かに落下した小球が点 B に初めて到達するのに要する時間]] → (サ) の式に、与えられた数値を代入する.'),
     tate: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`),
     keisan: [eq(T`\sqrt{\frac{R^3}{GM}} = \sqrt{\frac{(6.7\times10^6)^3}{6.7\times10^{-11}\times 1.0\times10^{25}}} = \sqrt{6.7^2\times10^4} = 6.7\times10^2`),
       eq(T`t = 3.1 \times 6.7\times10^2 \approx 2.1\times10^3\ [\mathrm{s}]`),

@@ -4,9 +4,14 @@ import { mathHtml, C } from './draw.mjs';
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** 文章の中の $...$ を数式にする。それ以外の文字はそのまま */
+const mathSplit = (s) => s.split('$').map((t, i) => (i % 2 ? mathHtml(t) : esc(t))).join('');
+/** 文章を HTML にする。$...$ は数式、[[...]] は問題文の引用(マーカー) */
 export function rich(s) {
-  return s.split('$').map((t, i) => (i % 2 ? mathHtml(t) : esc(t))).join('');
+  return s.split('[[').map((seg, i) => {
+    if (i === 0) return mathSplit(seg);
+    const [q, rest = ''] = seg.split(']]');
+    return `<mark class="src">${mathSplit(q)}</mark>${mathSplit(rest)}`;
+  }).join('');
 }
 
 /** 式を1行。no は式番号(①など)。ther=true で行頭に ∴ */
@@ -33,14 +38,17 @@ export const check = (s) => `<div class="check"><span class="mk">吟味</span>${
 export const sub = (label, ...parts) =>
   `<section class="q"><div class="lab">${label}</div><div class="body">${parts.flat().join('\n')}</div></section>`;
 
-/** 項目(現象理解・解法・立式・計算・答・吟味 のどれか) */
+/** 項目(現象・解法・立式・計算・答・吟味 のどれか)。項目ごとに色が違う */
+const KEY = { 現象: 'gen', 解法: 'kai', 立式: 'tat', 計算: 'kei', 答: 'ans', 吟味: 'gin' };
 export const step = (name, ...parts) =>
-  `<div class="step"><div class="sl">${name}</div><div class="sb">${parts.flat().join('\n')}</div></div>`;
+  `<div class="step s-${KEY[name]}"><div class="sl">${name}</div><div class="sb">${parts.flat().join('\n')}</div></div>`;
 
-/** 小問を6項目で書く。o = { genshou, kaihou, tate, keisan, ans, gimmi, note }  各値は HTML の配列(または文字列) */
+/** 小問を6項目で書く。o = { genshou, kaihou, tate, keisan, ans, gimmi, note }  各値は HTML の配列(または文字列)。
+ *  立式・計算・答 は「答案に書く」範囲として枠で囲む(現象・解法・吟味は考えるだけで、答案には書かない) */
 export const qa = (label, o) => sub(label,
-  step('現象理解', o.genshou ?? '—'), step('解法', o.kaihou ?? '—'), step('立式', o.tate ?? '—'),
-  step('計算', o.keisan ?? '—'), step('答', o.ans ?? '—'), step('吟味', o.gimmi ?? '—'),
+  step('現象', o.genshou ?? '—'), step('解法', o.kaihou ?? '—'),
+  `<div class="written"><span class="wtag">答案に書く</span>${step('立式', o.tate ?? '—')}${step('計算', o.keisan ?? '—')}${step('答', o.ans ?? '—')}</div>`,
+  step('吟味', o.gimmi ?? '—'),
   o.note ?? '');
 
 /** 図(SVG 文字列)を置く。cap は図の説明。表示幅は viewBox の幅 × --k。--k = 本文の文字 ÷ 図の文字(22) なので、図の記号が本文と同じ大きさに見える */
@@ -67,7 +75,11 @@ h1{font-size:18px;margin:0 0 4px}
 .eq,figure,.note,.check,.op,p{break-inside:avoid}.head{break-after:avoid}
 .lab{position:absolute;left:0;top:10px;width:3.3em;font-weight:700}
 .step{display:flex;gap:.8em;margin:.3em 0}
-.step>.sl{flex:0 0 4.8em;font-weight:700;color:#555}
+.s-gen{--c:#56B4E9;--t:#17608F}.s-kai{--c:#CC79A7;--t:#9A3C74}.s-tat{--c:#0072B2;--t:#0072B2}.s-kei{--c:#E1B800;--t:#7A6200}.s-ans{--c:#009E73;--t:#006B4E}.s-gin{--c:#D55E00;--t:#A84700}
+.step>.sl{flex:0 0 4.4em;font-weight:700;color:var(--t);border-left:4px solid var(--c);padding-left:.45em}
+mark.src{background:#FFF1A8;color:inherit;padding:0 .1em}
+.written{position:relative;margin:.6em 0 .4em;padding:.3em .6em;border:1px solid #9FB3CC;background:#F4F7FB;border-radius:4px}
+.wtag{position:absolute;right:.6em;top:-.85em;background:#fff;border:1px solid #9FB3CC;border-radius:3px;padding:0 .4em;color:#33516F}
 .step>.sb{flex:1;min-width:0}
 .step .eq,.step p{margin-left:0}
 .head{margin:2px 0 2px}
