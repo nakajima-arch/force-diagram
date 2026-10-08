@@ -9,9 +9,10 @@ import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
 // ---- 色(色覚の多様性に配慮した Okabe-Ito 系)。意味ごとにここだけで変える ----
 export const C = {
   ink: '#111111',     // 速さ・長さ・軸・文字
-  force: '#D55E00',   // 力(朱)
-  compA: '#D55E00',   // 分解した成分1(鉛直など)
-  compB: '#0072B2',   // 分解した成分2(水平など)
+  force: '#E69F00',   // 力(オレンジ)。原本でも力はオレンジ
+  compA: '#D55E00',   // 分解した成分1(原本の赤。朱にして見やすく)
+  compB: '#0072B2',   // 分解した成分2(原本の青)
+  inertia: '#D55E00', // 慣性力(見かけの力)。原本では赤
   target: '#009E73',  // 求める量
   label: '#0072B2',   // 状態ラベル(t=0 など)
   wall: '#555555',    // 床・壁
@@ -63,6 +64,17 @@ export function arrow(x1, y1, x2, y2, { color = C.ink, w = 2, head = null, dash 
 
 /** 力の矢印。tail が作用点。太め・朱色 */
 export const force = (x1, y1, x2, y2, o = {}) => arrow(x1, y1, x2, y2, { color: C.force, w: 2.8, ...o });
+
+/** 加速度の矢印 ⇨(白ぬきの太い矢印)。力ではないので、力の矢印とは形で区別する */
+export function accel(x1, y1, x2, y2, { color = C.force, w = 2.2 } = {}) {
+  const L = Math.hypot(x2 - x1, y2 - y1);
+  const ux = (x2 - x1) / L, uy = (y2 - y1) / L, nx = -uy, ny = ux;
+  const sw = 5, hw = 11, hl = Math.min(16, L * 0.45);       // 軸の半幅・矢じりの半幅・矢じりの長さ
+  const bx = x2 - ux * hl, by = y2 - uy * hl;               // 矢じりの付け根
+  const pt = (x, y, k, m) => `${r(x + nx * k * m)},${r(y + ny * k * m)}`;
+  const d = `M${pt(x1, y1, sw, 1)} L${pt(bx, by, sw, 1)} L${pt(bx, by, hw, 1)} L${r(x2)},${r(y2)} L${pt(bx, by, hw, -1)} L${pt(bx, by, sw, -1)} L${pt(x1, y1, sw, -1)} Z`;
+  return `<path d="${d}" fill="#fff" stroke="${color}" stroke-width="${w}" stroke-linejoin="round"/>`;
+}
 
 /** 線 */
 export const line = (x1, y1, x2, y2, { color = C.ink, w = 1.6, dash = null } = {}) =>

@@ -8,7 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { C, tex, arrow, force, line, box, ball, dot, floor, dim, stateLabel, jp, arc, hatch, figure } from './draw.mjs';
+import { C, tex, arrow, accel, force, line, box, ball, dot, floor, dim, stateLabel, jp, arc, hatch, figure } from './draw.mjs';
 
 const out = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'figures');
 const save = (name, svg) => fs.writeFileSync(path.join(out, name), svg);
@@ -67,6 +67,7 @@ const save = (name, svg) => fs.writeFileSync(path.join(out, name), svg);
   s += tex(172, 56, 'N', { size: 26 }) + tex(172, 196, 'mg', { size: 26 }) + tex(70, 126, '\\mu N', { size: 26, anchor: 'middle' });
   s += arrow(196, 120, 246, 120, { w: 1.8 });      // 運動の向き(力ではないので黒・細く)
   s += jp(196, 108, '運動の向き', { size: 12 });
+  s += accel(150, 76, 96, 76) + tex(123, 66, 'a', { size: 24, color: C.force, anchor: 'middle' });   // 減速するので加速度は左向き
   save('B_force_on_block.svg', figure(320, 220, s));
 }
 
