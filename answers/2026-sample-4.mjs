@@ -7,19 +7,20 @@ import { tex, force, box, dot, floor, jp, figure, JS } from '../tools/draw.mjs';
 import { figA, figD } from '../tools/figures.mjs';
 import { page, sub, head, op, eq, p, note, check, fig } from '../tools/answer.mjs';
 
-// (1) P が受ける力。鉛直方向のつりあいだけなので、速さの情報は描かない。
-// 作用点: mg は重心、N は接触面。重なって見えないよう、N は重力から横にずらして描く。
+// (1) P が受ける力(重力・垂直抗力・動摩擦力)。速さの情報は描かない。
+// 作用点: mg は重心、N と μ'N は接触面。重なって見えないよう、N は重力から横にずらす。
 const figForce = () => {
   let s = floor(80, 240, 140) + jp(88, 166, 'Q の上面', { size: JS });
   s += box(140, 100, 40, 40) + tex(120, 98, 'm', { anchor: 'end' });
   s += force(160, 120, 160, 196) + dot(160, 120);       // mg: 重心から
   s += force(174, 140, 174, 56) + dot(174, 140);        // N: 接触面から
-  s += tex(186, 70, 'N') + tex(170, 200, 'mg');
-  return figure(320, 220, s);
+  s += force(146, 140, 78, 140) + dot(146, 140);        // μ'N: 接触面から(P は Q に対して右へすべるので左向き)
+  s += tex(186, 70, 'N') + tex(170, 200, 'mg') + tex(112, 128, "\\mu' N", { anchor: 'middle' });
+  return figure(230, 180, `<g transform="translate(-45,-40)">${s}</g>`);   // 余白を切り詰めて図を大きく見せる
 };
 
 const body = [
-  sub('(1)', fig(figForce(), { cap: 'P が受ける力(重力は重心、垂直抗力は接触面から)' }),
+  sub('(1)', fig(figForce(), { cap: 'P が受ける力(重力は重心、垂直抗力・摩擦力は接触面から)' }),
     head('鉛直方向の力のつりあい'),
     eq('0 = N - mg'),
     eq('N = mg\\ .', { ther: true })),

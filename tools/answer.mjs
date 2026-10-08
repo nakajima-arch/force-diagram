@@ -33,46 +33,58 @@ export const check = (s) => `<div class="check"><span class="mk">吟味</span>${
 export const sub = (label, ...parts) =>
   `<section class="q"><div class="lab">${label}</div><div class="body">${parts.flat().join('\n')}</div></section>`;
 
-/** 図(SVG 文字列)を置く。cap は図の説明。表示幅は viewBox の幅 × 0.8 に固定(図ごとに文字の大きさがちがって見えないように) */
+/** 図(SVG 文字列)を置く。cap は図の説明。表示幅は viewBox の幅 × --k。--k = 本文の文字 ÷ 図の文字(22) なので、図の記号が本文と同じ大きさに見える */
 export const fig = (svg, { cap = '' } = {}) => {
   const vb = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
-  const w = vb ? Math.round(parseFloat(vb[1]) * 0.8) : 600;
-  return `<figure>${svg.replace(/<svg ([^>]*)>/, `<svg $1 style="width:${w}px">`)}${cap ? `<figcaption>${rich(cap)}</figcaption>` : ''}</figure>`;
+  const w = vb ? Math.round(parseFloat(vb[1])) : 600;
+  return `<figure>${svg.replace(/<svg ([^>]*)>/, `<svg $1 style="width:calc(${w}px * var(--k))">`)}${cap ? `<figcaption>${rich(cap)}</figcaption>` : ''}</figure>`;
 };
 
 /** ページ全体 */
-export function page({ title, lead = '', body }) {
+export function page({ title, lead = '', body, layout = 'two' }) {
   return `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <style>
-:root{--ink:${C.ink};--force:${C.force};--a:${C.compA};--b:${C.compB};--target:${C.target};--rule:#d6d6d6;--bg:#fff}
+:root{--ink:${C.ink};--force:${C.force};--a:${C.compA};--b:${C.compB};--target:${C.target};--rule:#d6d6d6;--bg:#fff;--k:.727}
 @media (prefers-color-scheme:dark){:root:not([data-print]){--ink:#eee;--bg:#161616;--rule:#444}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","IPAGothic",sans-serif;line-height:1.7;font-size:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP","IPAGothic",sans-serif;line-height:1.65;font-size:16px}
 main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:18px;margin:0 0 4px}
-.lead{color:#555;margin:0 0 18px}
-.q{display:grid;grid-template-columns:3.4em 1fr;gap:0 12px;padding:14px 0;border-top:1px solid var(--rule)}
-.lab{font-weight:700;font-size:18px}
-.head{margin:10px 0 2px}
+.lead{color:#555;margin:0 0 14px}
+.q{display:grid;grid-template-columns:3em 1fr;gap:0 10px;padding:10px 0;border-top:1px solid var(--rule);break-inside:avoid}
+.lab{font-weight:700}
+.head{margin:8px 0 2px}
 .head:first-child{margin-top:0}
 .def{margin-left:.2em}
-.op{margin:8px 0 0}
-.eq{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .5em;margin:.35em 0 .35em .8em}
+.op{margin:6px 0 0}
+.eq{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .5em;margin:.3em 0 .3em .8em}
 .eq .th{margin-left:.2em}
 .eq .no{margin-left:.4em}
 svg.m{display:inline-block;overflow:visible}
-figure{margin:6px 0 10px;padding:0}
+figure{margin:4px 0 8px;padding:0}
 figure>svg{max-width:100%;height:auto;display:block;background:#fff;border:1px solid var(--rule);border-radius:4px}
 figcaption{color:#555;margin-top:2px}
-p{margin:.4em 0 .4em .8em}
-.note{margin:.7em 0 .3em .8em;padding:.3em .7em;border:1px dashed #999;border-radius:4px}
+p{margin:.35em 0 .35em .8em}
+.note{margin:.6em 0 .3em .8em;padding:.25em .7em;border:1px dashed #999;border-radius:4px}
 .note .mk,.check .mk{font-weight:700;margin-right:.5em}
-.check{margin:.7em 0 .3em .8em;padding:.3em .7em;border-left:4px solid var(--a)}
+.check{margin:.6em 0 .3em .8em;padding:.25em .7em;border-left:4px solid var(--a)}
 .check .mk{color:var(--a)}
-@media print{@page{size:A4;margin:12mm}body{font-size:12.5px}main{padding:0}.q{break-inside:avoid}}
-</style></head><body><main data-print>
+/* 左右2段(ノートと同じ)。画面が広いときと印刷のとき */
+@media (min-width:1100px){main[data-layout=two]{max-width:1240px;column-count:2;column-gap:32px;column-rule:1px solid var(--ink)}
+ main[data-layout=two] h1,main[data-layout=two] .lead{column-span:all}}
+@media print{
+ @page{size:A4 landscape;margin:9mm}
+ :root{--k:.523}
+ body{font-size:11.5px;line-height:1.42}
+ main,main[data-layout]{max-width:none;padding:0}
+ main[data-layout=two]{column-count:2;column-gap:10mm;column-rule:1px solid #000}
+ main[data-layout=two] h1,main[data-layout=two] .lead{column-span:all}
+ h1{font-size:15px}.lead{margin-bottom:6px}
+ .q{padding:3px 0}.eq{margin:.1em 0 .1em .6em}.op{margin-top:2px}.head{margin:4px 0 1px}figure{margin:2px 0 3px}.note,.check{margin:.35em 0 .15em .8em;padding:.15em .6em}p{margin:.2em 0 .2em .8em}
+}
+</style></head><body><main data-print data-layout="${layout}">
 <h1>${esc(title)}</h1>
 ${lead ? `<p class="lead">${rich(lead)}</p>` : ''}
 ${body}
