@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { C, tex, arrow, accel, force, line, ball, dot, jp, curve, circ, vdim, figure, JS } from '../tools/draw.mjs';
+import { C, tex, arrow, accel, force, line, ball, dot, jp, curve, circ, arc, dim, vdim, figure, JS } from '../tools/draw.mjs';
 import { setCalc, page, qa, head, eq, pc, p, note, fig } from '../tools/answer.mjs';
 
 const T = String.raw;
@@ -80,13 +80,52 @@ const fig4 = () => {
   return figure(250, 330, `<g transform="translate(0,8)">${s}</g>`);
 };
 
+// ---- 図5: 参照円と x-t グラフ(単振動 = 等速円運動の射影)。x は A の向きが正(上) ----
+const fig5 = () => {
+  const cx = 110, cy = 150, R = 90, th = 60;                         // 円の中心・半径、点 P の角(A から時計まわりに θ = ωt)
+  const gx = 300, Tpx = 200;                                         // グラフの原点(t=0)と、周期 T の長さ
+  const rad = (th * Math.PI) / 180;
+  const P = [cx + R * Math.sin(rad), cy - R * Math.cos(rad)];       // 参照円上の点 P
+  let s = '';
+  // 軸: x(トンネルの向き)と、グラフの x と t
+  s += arrow(cx, cy + R + 22, cx, cy - R - 24, { w: 1.6 }) + tex(cx + 10, cy - R - 20, 'x');
+  s += arrow(gx, cy + R + 22, gx, cy - R - 24, { w: 1.6 }) + tex(gx + 10, cy - R - 20, 'x');
+  s += arrow(gx, cy, gx + Tpx + 40, cy, { w: 1.6 }) + tex(gx + Tpx + 44, cy + 18, 't');
+  // A と B の高さ
+  s += line(cx, cy - R, gx + Tpx + 20, cy - R, { w: 1.1, dash: '5 4' }) + line(cx, cy + R, gx + Tpx + 20, cy + R, { w: 1.1, dash: '5 4' });
+  s += tex(cx - 10, cy - R - 2, 'A', { anchor: 'end' }) + tex(cx - 10, cy + R + 18, 'B', { anchor: 'end' });
+  s += tex(gx - 10, cy - R + 6, 'R', { anchor: 'end' }) + tex(gx - 10, cy + R + 6, '-R', { anchor: 'end' });
+  // 参照円と、半径・角 θ
+  s += circ(cx, cy, R, { fill: 'none' }) + dot(cx, cy, 2.5, C.ink) + tex(cx - 12, cy + 20, T`\mathrm{O}`, { anchor: 'end' });
+  s += line(cx, cy, P[0], P[1], { w: 1.4 }) + arc(cx, cy, 30, 90, 90 - th) + tex(cx + 18, cy - 38, T`\omega t`);
+  // P の速度 Rω(円の接線)を、トンネル方向(朱)と垂直方向(青)に分ける
+  const ux = Math.cos(rad), uy = Math.sin(rad), L = 60;               // 時計まわりの接線の向き(画面): (cos θ, sin θ)
+  s += arrow(P[0], P[1], P[0] + L * ux, P[1] + L * uy, { w: 2 }) + tex(P[0] + L * ux + 6, P[1] + L * uy + 6, T`R\omega`);
+  s += arrow(P[0], P[1], P[0], P[1] + L * uy, { color: C.compA, w: 2 }) + tex(P[0] - 8, P[1] + L * uy / 2 + 8, 'v', { color: C.compA, anchor: 'end' });
+  s += arrow(P[0], P[1], P[0] + L * ux, P[1], { color: C.compB, w: 2 });
+  s += dot(P[0], P[1], 3, C.ink);
+  // トンネル内の小球(P の x への射影)と、グラフ上の対応する点
+  s += ball(cx, P[1], 5);
+  const u = th / 360, gy = cy - R * Math.cos(rad);
+  s += line(P[0], P[1], gx + Tpx * u, gy, { w: 1.1, dash: '5 4' }) + line(gx + Tpx * u, gy, gx + Tpx * u, cy, { w: 1.1, dash: '5 4' });
+  // x-t グラフ: x = R cos ωt
+  const pts = []; for (let i = 0; i <= 80; i++) { const uu = i / 80; pts.push([gx + Tpx * uu, cy - R * Math.cos(2 * Math.PI * uu)]); }
+  s += curve(pts, { w: 2.4 }) + dot(gx + Tpx * u, gy, 3.5, C.ink);
+  // 周期: 半周期 T/2 と T
+  s += line(gx + Tpx / 2, cy - 5, gx + Tpx / 2, cy + 5) + line(gx + Tpx, cy - 5, gx + Tpx, cy + 5);
+  s += dim(gx, gx + Tpx / 2, cy + R + 44, { gap: [gx + Tpx / 4 - 18, gx + Tpx / 4 + 18], color: C.target }) + tex(gx + Tpx / 4, cy + R + 52, T`\frac{T}{2}`, { anchor: 'middle', color: C.target });
+  s += tex(gx + Tpx, cy + 24, 'T', { anchor: 'middle' });
+  s += tex(gx - 10, cy + 20, T`\mathrm{O}`, { anchor: 'end' });
+  return figure(580, 340, `<g transform="translate(0,-10)">${s}</g>`);
+};
+
 const body = [
   qa('(1) ア', {
     genshou: [fig(fig1(), { cap: '状態①(表面)から状態②(高さ $h$)まで' }),
       p('小球は表面(状態①、速さ $v$)から高さ $h$(状態②)まで上がる。重力以外の力ははたらかない.')],
     kaihou: p(T`[[大気の抵抗の影響は無視できる]] → はたらく力は万有引力(保存力)だけ → エネルギー保存則。万有引力による位置エネルギーは $-\frac{GMm}{r}$(無限遠が基準).`),
     tate: [head('エネルギー保存則', '$v_h$:高さ $h$ での速さ'),
-      eq(T`\underbrace{\frac12 mv^2 - \frac{GMm}{R}}_{\displaystyle\text{①の力学的エネルギー}} = \underbrace{\frac12 mv_h^2 - \frac{GMm}{R+h}}_{\displaystyle\text{②の力学的エネルギー}}`)],
+      eq(T`\underbracket[0.4pt][2pt]{\frac12 mv^2 - \frac{GMm}{R}}_{\displaystyle\text{①の力学的エネルギー}} = \underbracket[0.4pt][2pt]{\frac12 mv_h^2 - \frac{GMm}{R+h}}_{\displaystyle\text{②の力学的エネルギー}}`)],
     keisan: eq(T`v_h^2 = v^2 - 2GM\left(\frac1R - \frac1{R+h}\right) = v^2 - \frac{2GMh}{R(R+h)}`),
     ans: eq(T`v_h = \sqrt{v^2 - \frac{2GMh}{R(R+h)}}`, { ther: true, ch: '①' }),
     gimmi: p('$h = 0$ で $v_h = v$ となり、はじめの速さと一致する。$h$ が大きいほど $v_h$ は小さい(減速).'),
@@ -114,7 +153,7 @@ const body = [
     genshou: [fig(fig2(), { cap: '半径 $r$ の球(質量 $M_r$)と、小球が受ける万有引力 $F$' }),
       p('惑星は一様な密度。半径 $r$ の球の質量 $M_r$ を考える.')],
     kaihou: p('[[一様な球]] → 密度が一定。$r < R$ では質量は体積に比例し、$r \\ge R$ では惑星全体の質量.'),
-    tate: eq(T`M_r : M = \underbrace{\frac43\pi r^3}_{\displaystyle\text{半径 }r\text{ の球の体積}} : \underbrace{\frac43\pi R^3}_{\displaystyle\text{惑星の体積}} \quad (r < R)`),
+    tate: eq(T`M_r : M = \underbracket[0.4pt][2pt]{\frac43\pi r^3}_{\displaystyle\text{半径 }r\text{ の球の体積}} : \underbracket[0.4pt][2pt]{\frac43\pi R^3}_{\displaystyle\text{惑星の体積}} \quad (r < R)`),
     keisan: eq(T`M_r = M\,\frac{r^3}{R^3}`),
     ans: [eq('M_r = M', { lead: '$r \\ge R$ のとき', ther: true, ch: '⓪ (エ)' }), eq(T`M_r = M\,\frac{r^3}{R^3}`, { lead: '$r < R$ のとき', ther: true, ch: '③ (オ)' })],
     gimmi: p('$r = R$ で (エ)(オ) はどちらも $M$ となり、一致する.'),
@@ -143,16 +182,16 @@ const body = [
     genshou: [fig(fig4(), { cap: '$x$:$\\mathrm{O}$ から A の向きを正とする' }),
       p('小球は A で静止して出発する。力は常に $\\mathrm{O}$ を向く.')],
     kaihou: p('[[運動方程式からトンネル内部における小球は]] → 運動方程式を立て、$a = -\\omega^2 x$ の形なら単振動.'),
-    tate: [head('運動方程式', '$x$:$\\mathrm{O}$ から A の向きの位置、$a$:加速度'), eq(T`ma = \underbrace{-G\,\frac{mM}{R^3}\,x}_{\displaystyle\mathrm{O}\text{ 向きの万有引力}}`)],
+    tate: [head('運動方程式', '$x$:$\\mathrm{O}$ から A の向きの位置、$a$:加速度'), eq(T`ma = \underbracket[0.4pt][2pt]{-G\,\frac{mM}{R^3}\,x}_{\displaystyle\mathrm{O}\text{ 向きの万有引力}}`)],
     keisan: [eq(T`a = -\frac{GM}{R^3}\,x`), eq(T`\omega = \sqrt{\frac{GM}{R^3}}`)],
     ans: pc('$a = -\\omega^2 x$ の形なので、単振動.', '⓪'),
     gimmi: p('$x > 0$ で $a < 0$、$x < 0$ で $a > 0$。加速度はつねに $\\mathrm{O}$ 向きで、復元力としてはたらく.'),
   }),
 
   qa('サ', {
-    genshou: p('A で静止して始まるので、A は振動の端。振幅は $R$、中心は $\\mathrm{O}$。B は反対の端で、A から B までは半周期.'),
+    genshou: [fig(fig5(), { cap: '参照円(半径 $R$、角速度 $\\omega$)と $x$-$t$ グラフ。A から B は半周期' }), p('A で静止して始まるので、A は振動の端。振幅は $R$、中心は $\\mathrm{O}$。B は反対の端で、A から B までは半周期.')],
     kaihou: p(T`[[点 A から静かに落下]] → A は振動の端。[[点 B に初めて到達するまでにかかる時間]] → 半周期。単振動の周期は $T = \frac{2\pi}{\omega}$.`),
-    tate: eq(T`t = \underbrace{\frac T2}_{\displaystyle\text{A から B は半周期}} = \frac{\pi}{\omega}`),
+    tate: eq(T`t = \underbracket[0.4pt][2pt]{\frac T2}_{\displaystyle\text{半周期}} = \frac{\pi}{\omega}`),
     keisan: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`),
     ans: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`, { ther: true, ch: '⓪' }),
     gimmi: p(T`$m$ によらない。$\sqrt{R^3/GM}$ は時間の次元になる.`),
@@ -162,11 +201,11 @@ const body = [
     genshou: p('A で静止した小球が、中心から距離 $r$ の位置にきたときの速さ $v$.'),
     kaihou: p(T`[[中心からの距離 $r$ の位置にある小球の速さ]] → エネルギー保存則。復元力 $-kx$ ($k = \frac{GMm}{R^3}$) の位置エネルギーは $\frac12 kx^2$.`),
     tate: [head('エネルギー保存則', '中心 $\\mathrm{O}$ が基準'),
-      eq(T`\underbrace{\frac12 mv^2}_{\displaystyle\text{運動エネルギー}} + \underbrace{\frac12\cdot\frac{GMm}{R^3}\,r^2}_{\displaystyle\text{位置エネルギー}} = \underbrace{\frac12\cdot\frac{GMm}{R^3}\,R^2}_{\displaystyle\text{A(静止)}}`)],
+      eq(T`\underbracket[0.4pt][2pt]{\frac12 mv^2}_{\displaystyle\text{運動エネルギー}} + \underbracket[0.4pt][2pt]{\frac12\cdot\frac{GMm}{R^3}\,r^2}_{\displaystyle\text{位置エネルギー}} = \underbracket[0.4pt][2pt]{\frac12\cdot\frac{GMm}{R^3}\,R^2}_{\displaystyle\text{A(静止)}}`)],
     keisan: eq(T`v^2 = \frac{GM}{R^3}\,(R^2 - r^2)`),
     ans: eq(T`v = \sqrt{\frac{GM}{R}\left(1 - \frac{r^2}{R^2}\right)}`, { ther: true, ch: '②' }),
     gimmi: p(T`$r = R$ で $v = 0$(端で静止)、$r = 0$ で最大 $v = \sqrt{GM/R}$ となり、単振動の様子と合う.`),
-    note: note(T`参照円に着目すると $v = \omega\sqrt{R^2 - r^2}$ となり、同じ結果.`),
+    note: note(T`参照円(上の図)に着目すると、速さ $R\omega$ のうち $x$ 方向の成分が $v = R\omega\sin\omega t = \omega\sqrt{R^2 - r^2}$ となり、同じ結果.`),
   }),
 
   qa('ス', {

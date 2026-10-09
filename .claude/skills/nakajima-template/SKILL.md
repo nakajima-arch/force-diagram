@@ -56,7 +56,7 @@ description: 物理(力学)の問題に対して、中島先生の型で記述�
 
 - **「答案に書く」範囲 = 立式・答**(必要な計算だけ加える)。薄い枠で囲み、「答案に書く」の札を付ける。現象・解法・吟味・途中の計算は考えるための項目で、答案には書かない。
 - 途中式を出さない答案だけの版が必要なときは `node answers/<名前>.mjs none`(`<名前>.none.html`)。
-- **式の説明は式の下に書く**: TeX の `\underbrace{…}_{\displaystyle\text{説明}}` を使う(例: `\underbrace{m v_1 - m v_0}_{\displaystyle\text{運動量の変化}} = \underbrace{-\mu' m g\,t_1}_{\displaystyle\text{力積(左向き)}}`)。説明は短く。
+- **式の説明は式の下に書く**: TeX の `\underbracket[0.4pt][2pt]{…}_{\displaystyle\text{説明}}`(細い下かっこ)を使う(例: `\underbracket[0.4pt][2pt]{m v_1 - m v_0}_{\displaystyle\text{運動量の変化}} = \underbracket[0.4pt][2pt]{-\mu' m g\,t_1}_{\displaystyle\text{力積(左向き)}}`)。説明は短く。太い `\underbrace` は主張が強すぎるので使わない。
 - **不要な改行はしない**: 結論の選択肢は式と同じ行(`eq(…, {ther:true, ch:'③'})`)、操作の一言も式と同じ行(`eq(…, {lead:'①+② より … して'})`)に置く。
 - 解法の引用は、問題文の言葉をそのまま短く抜き出す(言い換えない)。
 - 縦A4・1列で出す(2ページ以上になってもよい)。小問は途中で改ページしない。

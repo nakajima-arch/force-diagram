@@ -5,6 +5,7 @@ import { TeX } from 'mathjax-full/js/input/tex.js';
 import { SVG } from 'mathjax-full/js/output/svg.js';
 import { liteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor.js';
 import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html.js';
+import 'mathjax-full/js/input/tex/mathtools/MathtoolsConfiguration.js';
 
 // ---- 色(色覚の多様性に配慮した Okabe-Ito 系)。意味ごとにここだけで変える ----
 export const C = {
@@ -26,7 +27,7 @@ export const JS = 16;   // 日本語
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
 const mj = mathjax.document('', {
-  InputJax: new TeX({ packages: ['base', 'ams'] }),
+  InputJax: new TeX({ packages: ['base', 'ams', 'mathtools'] }),
   OutputJax: new SVG({ fontCache: 'none' }),
 });
 
