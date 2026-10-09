@@ -43,13 +43,25 @@ const KEY = { 現象: 'gen', 解法: 'kai', 立式: 'tat', 計算: 'kei', 答: '
 export const step = (name, ...parts) =>
   `<div class="step s-${KEY[name]}"><div class="sl">${name}</div><div class="sb">${parts.flat().join('\n')}</div></div>`;
 
-/** 小問を6項目で書く。o = { genshou, kaihou, tate, keisan, ans, gimmi, note }  各値は HTML の配列(または文字列)。
- *  立式・計算・答 は「答案に書く」範囲として枠で囲む(現象・解法・吟味は考えるだけで、答案には書かない) */
-export const qa = (label, o) => sub(label,
-  step('現象', o.genshou ?? '—'), step('解法', o.kaihou ?? '—'),
-  `<div class="written"><span class="wtag">答案に書く</span>${step('立式', o.tate ?? '—')}${step('計算', o.keisan ?? '—')}${step('答', o.ans ?? '—')}</div>`,
-  step('吟味', o.gimmi ?? '—'),
-  o.note ?? '');
+/** 計算の見せ方: 'fold'(折りたたみ。画面で開ける) | 'open'(全部開く) | 'none'(出さない。答案用) */
+let CALC = 'fold';
+export const setCalc = (m) => { CALC = m; };
+
+/** 小問を6項目で書く。o = { genshou, kaihou, tate, keisan, keisanKeep, ans, gimmi, note }  各値は HTML の配列(または文字列)。
+ *  「答案に書く」枠 = 立式 + 答(必要な計算だけ keisanKeep:true で枠に入れる)。
+ *  計算(途中式)は答案に書かないので枠の外に出し、折りたたむ。 */
+export const qa = (label, o) => {
+  const hasCalc = o.keisan && o.keisan !== '—';
+  const inFrame = hasCalc && o.keisanKeep;
+  const outside = hasCalc && !o.keisanKeep && CALC !== 'none'
+    ? `<details class="calc"${CALC === 'open' ? ' open' : ''}><summary>計算(途中式)<span class="nw">答案には書かない</span></summary>${step('計算', o.keisan)}</details>` : '';
+  return sub(label,
+    step('現象', o.genshou ?? '—'), step('解法', o.kaihou ?? '—'),
+    `<div class="written"><span class="wtag">答案に書く</span>${step('立式', o.tate ?? '—')}${inFrame ? step('計算', o.keisan) : ''}${step('答', o.ans ?? '—')}</div>`,
+    outside,
+    step('吟味', o.gimmi ?? '—'),
+    o.note ?? '');
+};
 
 /** 図(SVG 文字列)を置く。cap は図の説明。表示幅は viewBox の幅 × --k。--k = 本文の文字 ÷ 図の文字(22) なので、図の記号が本文と同じ大きさに見える */
 export const fig = (svg, { cap = '' } = {}) => {
@@ -81,6 +93,10 @@ mark.src{background:#FFF1A8;color:inherit;padding:0 .1em}
 .written{position:relative;margin:.6em 0 .4em;padding:.3em .6em;border:1px solid #9FB3CC;background:#F4F7FB;border-radius:4px}
 .wtag{position:absolute;right:.6em;top:-.85em;background:#fff;border:1px solid #9FB3CC;border-radius:3px;padding:0 .4em;color:#33516F}
 .step>.sb{flex:1;min-width:0}
+details.calc{margin:.3em 0}
+details.calc>summary{cursor:pointer;color:#7A6200;font-weight:700;list-style-position:inside}
+details.calc>summary .nw{margin-left:.8em;font-weight:400;color:#777}
+details.calc[open]>summary{margin-bottom:.2em}
 .step .eq,.step p{margin-left:0}
 .head{margin:2px 0 2px}
 .head:first-child{margin-top:0}

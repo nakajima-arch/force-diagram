@@ -4,9 +4,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { C, tex, arrow, accel, force, line, ball, dot, jp, curve, circ, vdim, figure, JS } from '../tools/draw.mjs';
-import { page, qa, head, eq, p, note, fig } from '../tools/answer.mjs';
+import { setCalc, page, qa, head, eq, p, note, fig } from '../tools/answer.mjs';
 
 const T = String.raw;
+const MODE = process.argv[2] ?? 'fold';          // fold: 画面用(計算を折りたたむ) / none: 答案用(計算を出さない) / open: 全部開く
+setCalc(MODE);
 const choice = (c) => `<div class="eq"><span class="th">∴</span><span class="f"><b>${c}</b> .</span></div>`;
 
 // ---- 図1: 打ち上げ(状態①: 表面 / 状態②: 高さ h) ----
@@ -171,6 +173,7 @@ const body = [
     genshou: p('具体的な惑星の数値で、A から B までの時間を求める.'),
     kaihou: p('[[点 A から静かに落下した小球が点 B に初めて到達するのに要する時間]] → (サ) の式に、与えられた数値を代入する.'),
     tate: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`),
+    keisanKeep: true,
     keisan: [eq(T`\sqrt{\frac{R^3}{GM}} = \sqrt{\frac{(6.7\times10^6)^3}{6.7\times10^{-11}\times 1.0\times10^{25}}} = \sqrt{6.7^2\times10^4} = 6.7\times10^2`),
       eq(T`t = 3.1 \times 6.7\times10^2 \approx 2.1\times10^3\ [\mathrm{s}]`),
       eq(T`\frac{2.1\times10^3}{60} \approx 35\ [\text{分}]`)],
@@ -184,6 +187,6 @@ const html = page({
   lead: '半径 $R$・質量 $M$ の一様な惑星と質量 $m$ の小球。万有引力定数 $G$. 選択問題なので、導出のあとに解答群の番号を書く.',
   body,
 });
-const out = path.join(path.dirname(fileURLToPath(import.meta.url)), '2026-p3-1.html');
+const out = path.join(path.dirname(fileURLToPath(import.meta.url)), MODE === 'fold' ? '2026-p3-1.html' : `2026-p3-1.${MODE}.html`);
 fs.writeFileSync(out, html);
 console.log('wrote', out);

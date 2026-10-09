@@ -5,7 +5,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { C, tex, force, box, dot, floor, jp, figure, JS } from '../tools/draw.mjs';
 import { figA, figD } from '../tools/figures.mjs';
-import { page, qa, head, op, eq, p, check, fig } from '../tools/answer.mjs';
+import { setCalc, page, qa, head, op, eq, p, check, fig } from '../tools/answer.mjs';
+
+const MODE = process.argv[2] ?? 'fold';          // fold: 画面用(計算を折りたたむ) / none: 答案用(計算を出さない) / open: 全部開く
+setCalc(MODE);
 
 // (1) P が受ける力(重力・垂直抗力・動摩擦力)。速さの情報は描かない。
 // 作用点: mg は重心、N と μ'N は接触面。重なって見えないよう、N は重力から横にずらす。
@@ -67,8 +70,8 @@ const body = [
     genshou: p('①, ② には $t_1$ が含まれる.'),
     kaihou: p('[[$v_1$ を $v_0$ を用いて表しなさい]] → ①, ② の和をとり、$t_1$ を消去する.'),
     tate: p('①, ②.'),
-    keisan: [op('①+② より $t_1$ を消去して'), eq('5m v_1 - m v_0 = 0')],
-    ans: eq('v_1 = \\frac{v_0}{5}\\ .', { ther: true }),
+    keisan: eq('5m v_1 - m v_0 = 0'),
+    ans: [op('①+② より $t_1$ を消去して'), eq('v_1 = \\frac{v_0}{5}\\ .', { ther: true })],
     gimmi: p('$0 < v_1 < v_0$。運動量保存($m v_0 = 5m v_1$)から求めた値と一致する.'),
   }),
 
@@ -76,8 +79,8 @@ const body = [
     genshou: p('(5) で $v_1$ が求まったので、①か② に代入すれば $t_1$ が求まる.'),
     kaihou: p("[[$t_1$ を $v_0$, $\\mu'$, $g$ を用いて表しなさい]] → ② に (5) の $v_1$ を代入する."),
     tate: p('②.'),
-    keisan: [op('② に $v_1$ を代入して'), eq("\\frac{4}{5} m v_0 = \\mu' m g\\, t_1")],
-    ans: eq("t_1 = \\frac{4 v_0}{5\\mu' g}\\ .", { ther: true }),
+    keisan: eq("\\frac{4}{5} m v_0 = \\mu' m g\\, t_1"),
+    ans: [op('② に $v_1$ を代入して'), eq("t_1 = \\frac{4 v_0}{5\\mu' g}\\ .", { ther: true })],
     gimmi: p('$t_1 > 0$。$\\mu\'$ が大きい(摩擦が大きい)ほど $t_1$ は短い.'),
   }),
 
@@ -96,8 +99,8 @@ const body = [
     genshou: p('③ は $x_P$ と $v_1$ だけを含む。(5) で $v_1$ が分かっている.'),
     kaihou: p("[[$x_P$ を $v_0$, $\\mu'$, $g$ を用いて表しなさい]] → ③ に $v_1 = \\frac{v_0}{5}$ を代入する."),
     tate: p('③.'),
-    keisan: [op('③ に $v_1 = \\frac{v_0}{5}$ を代入して'), eq("\\frac{1}{2} m \\cdot \\frac{24}{25} v_0^{2} = \\mu' m g\\, x_P")],
-    ans: eq("x_P = \\frac{12 v_0^{2}}{25\\mu' g}\\ .", { ther: true }),
+    keisan: eq("\\frac{1}{2} m \\cdot \\frac{24}{25} v_0^{2} = \\mu' m g\\, x_P"),
+    ans: [op('③ に $v_1 = \\frac{v_0}{5}$ を代入して'), eq("x_P = \\frac{12 v_0^{2}}{25\\mu' g}\\ .", { ther: true })],
     gimmi: p('$x_P > 0$。次の (9) で、$x_P - x_Q$ と照らして確かめる.'),
   }),
 
@@ -117,6 +120,6 @@ const html = page({
   lead: "中島テンプレによる答案(下書き)。質量 $m$ の P が速さ $v_0$ で、なめらかな床の上の質量 $4m$ の Q に乗る。P–Q 間の動摩擦係数は $\\mu'$。",
   body,
 });
-const out = path.join(path.dirname(fileURLToPath(import.meta.url)), '2026-sample-4.html');
+const out = path.join(path.dirname(fileURLToPath(import.meta.url)), MODE === 'fold' ? '2026-sample-4.html' : `2026-sample-4.${MODE}.html`);
 fs.writeFileSync(out, html);
 console.log('wrote', out);
