@@ -4,10 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { C, tex, arrow, accel, force, line, ball, dot, jp, curve, circ, vdim, figure, JS } from '../tools/draw.mjs';
-import { setCalc, page, qa, head, eq, p, note, fig } from '../tools/answer.mjs';
+import { setCalc, page, qa, head, eq, pc, p, note, fig } from '../tools/answer.mjs';
 
 const T = String.raw;
-const MODE = process.argv[2] ?? 'fold';          // fold: 画面用(計算を折りたたむ) / none: 答案用(計算を出さない) / open: 全部開く
+const MODE = process.argv[2] ?? 'show';          // show: 途中式を載せる(既定) / none: 答案だけ(途中式を出さない)
 setCalc(MODE);
 const choice = (c) => `<div class="eq"><span class="th">∴</span><span class="f"><b>${c}</b> .</span></div>`;
 
@@ -86,9 +86,9 @@ const body = [
       p('小球は表面(状態①、速さ $v$)から高さ $h$(状態②)まで上がる。重力以外の力ははたらかない.')],
     kaihou: p(T`[[大気の抵抗の影響は無視できる]] → はたらく力は万有引力(保存力)だけ → エネルギー保存則。万有引力による位置エネルギーは $-\frac{GMm}{r}$(無限遠が基準).`),
     tate: [head('エネルギー保存則', '$v_h$:高さ $h$ での速さ'),
-      eq(T`\frac12 mv^2 - \frac{GMm}{R} = \frac12 mv_h^2 - \frac{GMm}{R+h}`)],
+      eq(T`\underbrace{\frac12 mv^2 - \frac{GMm}{R}}_{\displaystyle\text{①の力学的エネルギー}} = \underbrace{\frac12 mv_h^2 - \frac{GMm}{R+h}}_{\displaystyle\text{②の力学的エネルギー}}`)],
     keisan: eq(T`v_h^2 = v^2 - 2GM\left(\frac1R - \frac1{R+h}\right) = v^2 - \frac{2GMh}{R(R+h)}`),
-    ans: [eq(T`v_h = \sqrt{v^2 - \frac{2GMh}{R(R+h)}}`, { ther: true }), choice('①')],
+    ans: eq(T`v_h = \sqrt{v^2 - \frac{2GMh}{R(R+h)}}`, { ther: true, ch: '①' }),
     gimmi: p('$h = 0$ で $v_h = v$ となり、はじめの速さと一致する。$h$ が大きいほど $v_h$ は小さい(減速).'),
   }),
 
@@ -97,7 +97,7 @@ const body = [
     kaihou: p('[[小球が惑星表面から最も離れていたときの距離]] → 最高点では速さ 0。(ア) の式で $v_h = 0$、$h = H$($H$:最高点の表面からの距離)とおく.'),
     tate: eq(T`0 = v^2 - \frac{2GMH}{R(R+H)}`),
     keisan: [eq(T`v^2 R(R+H) = 2GMH`), eq(T`H\,(2GM - v^2R) = v^2R^2`)],
-    ans: [eq(T`H = \frac{v^2R^2}{2GM - v^2R}`, { ther: true }), choice('④')],
+    ans: eq(T`H = \frac{v^2R^2}{2GM - v^2R}`, { ther: true, ch: '④' }),
     gimmi: p('$2GM - v^2R > 0$ のとき $H > 0$。$v \\to 0$ で $H \\to 0$ となり、もっともらしい.'),
   }),
 
@@ -106,7 +106,7 @@ const body = [
     kaihou: p('[[じゅうぶんに時間が経過しても小球が惑星表面に戻ってこない]] → 最高点がない。(イ) の $H$ が有限にならない条件を考える(分母が 0 以下).'),
     tate: eq(T`2GM - v^2R \le 0`),
     keisan: eq(T`v^2 \ge \frac{2GM}{R}`),
-    ans: [eq(T`v \ge \sqrt{\frac{2GM}{R}}`, { ther: true }), choice('④')],
+    ans: eq(T`v \ge \sqrt{\frac{2GM}{R}}`, { ther: true, ch: '④' }),
     gimmi: p(T`$v = \sqrt{2GM/R}$ は脱出速度で、(ウ) はこの境界を含む。全エネルギー $\frac12 mv^2 - \frac{GMm}{R} \ge 0$ でも同じ結果になる.`),
   }),
 
@@ -114,9 +114,9 @@ const body = [
     genshou: [fig(fig2(), { cap: '半径 $r$ の球(質量 $M_r$)と、小球が受ける万有引力 $F$' }),
       p('惑星は一様な密度。半径 $r$ の球の質量 $M_r$ を考える.')],
     kaihou: p('[[一様な球]] → 密度が一定。$r < R$ では質量は体積に比例し、$r \\ge R$ では惑星全体の質量.'),
-    tate: eq(T`M_r : M = \frac43\pi r^3 : \frac43\pi R^3 \quad (r < R)`),
+    tate: eq(T`M_r : M = \underbrace{\frac43\pi r^3}_{\displaystyle\text{半径 }r\text{ の球の体積}} : \underbrace{\frac43\pi R^3}_{\displaystyle\text{惑星の体積}} \quad (r < R)`),
     keisan: eq(T`M_r = M\,\frac{r^3}{R^3}`),
-    ans: [p('$r \\ge R$:$M_r = M$'), choice('⓪ (エ)'), p(T`$r < R$:$M_r = M\frac{r^3}{R^3}$`), choice('③ (オ)')],
+    ans: [eq('M_r = M', { lead: '$r \\ge R$ のとき', ther: true, ch: '⓪ (エ)' }), eq(T`M_r = M\,\frac{r^3}{R^3}`, { lead: '$r < R$ のとき', ther: true, ch: '③ (オ)' })],
     gimmi: p('$r = R$ で (エ)(オ) はどちらも $M$ となり、一致する.'),
   }),
 
@@ -135,7 +135,7 @@ const body = [
     tate: [head('万有引力の法則'), eq(T`F = G\,\frac{m M_r}{r^2}`)],
     keisan: [p('$r \\ge R$ ($M_r = M$)'), eq(T`F = G\,\frac{mM}{r^2}`),
       p(T`$r < R$ ($M_r = M\frac{r^3}{R^3}$)`), eq(T`F = G\,\frac{m}{r^2}\cdot M\frac{r^3}{R^3} = G\,\frac{mM}{R^3}\,r`)],
-    ans: [choice('⓪ (キ)'), choice('③ (ク)'), p(T`グラフ:$r < R$ では $r$ に比例、$r \ge R$ では $\frac{1}{r^2}$ で減少`), choice('① (ケ)')],
+    ans: [eq(T`F = G\,\frac{mM}{r^2}`, { lead: '$r \\ge R$ のとき', ther: true, ch: '⓪ (キ)' }), eq(T`F = G\,\frac{mM}{R^3}\,r`, { lead: '$r < R$ のとき', ther: true, ch: '③ (ク)' }), pc(T`グラフ:$r < R$ では $r$ に比例、$r \ge R$ では $\frac{1}{r^2}$ で減少`, '① (ケ)')],
     gimmi: p(T`$r = R$ で (キ)(ク) はどちらも $G\frac{mM}{R^2}$ となり、$F$ は連続. $r = 0$ で $F = 0$.`),
   }),
 
@@ -143,18 +143,18 @@ const body = [
     genshou: [fig(fig4(), { cap: '$x$:$\\mathrm{O}$ から A の向きを正とする' }),
       p('小球は A で静止して出発する。力は常に $\\mathrm{O}$ を向く.')],
     kaihou: p('[[運動方程式からトンネル内部における小球は]] → 運動方程式を立て、$a = -\\omega^2 x$ の形なら単振動.'),
-    tate: [head('運動方程式', '$x$:$\\mathrm{O}$ から A の向きの位置、$a$:加速度'), eq(T`ma = -G\,\frac{mM}{R^3}\,x`)],
+    tate: [head('運動方程式', '$x$:$\\mathrm{O}$ から A の向きの位置、$a$:加速度'), eq(T`ma = \underbrace{-G\,\frac{mM}{R^3}\,x}_{\displaystyle\mathrm{O}\text{ 向きの万有引力}}`)],
     keisan: [eq(T`a = -\frac{GM}{R^3}\,x`), eq(T`\omega = \sqrt{\frac{GM}{R^3}}`)],
-    ans: [p('$a = -\\omega^2 x$ の形なので、単振動.'), choice('⓪')],
+    ans: pc('$a = -\\omega^2 x$ の形なので、単振動.', '⓪'),
     gimmi: p('$x > 0$ で $a < 0$、$x < 0$ で $a > 0$。加速度はつねに $\\mathrm{O}$ 向きで、復元力としてはたらく.'),
   }),
 
   qa('サ', {
     genshou: p('A で静止して始まるので、A は振動の端。振幅は $R$、中心は $\\mathrm{O}$。B は反対の端で、A から B までは半周期.'),
     kaihou: p(T`[[点 A から静かに落下]] → A は振動の端。[[点 B に初めて到達するまでにかかる時間]] → 半周期。単振動の周期は $T = \frac{2\pi}{\omega}$.`),
-    tate: eq(T`t = \frac T2 = \frac{\pi}{\omega}`),
+    tate: eq(T`t = \underbrace{\frac T2}_{\displaystyle\text{A から B は半周期}} = \frac{\pi}{\omega}`),
     keisan: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`),
-    ans: [eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`, { ther: true }), choice('⓪')],
+    ans: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`, { ther: true, ch: '⓪' }),
     gimmi: p(T`$m$ によらない。$\sqrt{R^3/GM}$ は時間の次元になる.`),
   }),
 
@@ -162,9 +162,9 @@ const body = [
     genshou: p('A で静止した小球が、中心から距離 $r$ の位置にきたときの速さ $v$.'),
     kaihou: p(T`[[中心からの距離 $r$ の位置にある小球の速さ]] → エネルギー保存則。復元力 $-kx$ ($k = \frac{GMm}{R^3}$) の位置エネルギーは $\frac12 kx^2$.`),
     tate: [head('エネルギー保存則', '中心 $\\mathrm{O}$ が基準'),
-      eq(T`\frac12 mv^2 + \frac12\cdot\frac{GMm}{R^3}\,r^2 = 0 + \frac12\cdot\frac{GMm}{R^3}\,R^2`)],
+      eq(T`\underbrace{\frac12 mv^2}_{\displaystyle\text{運動エネルギー}} + \underbrace{\frac12\cdot\frac{GMm}{R^3}\,r^2}_{\displaystyle\text{位置エネルギー}} = \underbrace{\frac12\cdot\frac{GMm}{R^3}\,R^2}_{\displaystyle\text{A(静止)}}`)],
     keisan: eq(T`v^2 = \frac{GM}{R^3}\,(R^2 - r^2)`),
-    ans: [eq(T`v = \sqrt{\frac{GM}{R}\left(1 - \frac{r^2}{R^2}\right)}`, { ther: true }), choice('②')],
+    ans: eq(T`v = \sqrt{\frac{GM}{R}\left(1 - \frac{r^2}{R^2}\right)}`, { ther: true, ch: '②' }),
     gimmi: p(T`$r = R$ で $v = 0$(端で静止)、$r = 0$ で最大 $v = \sqrt{GM/R}$ となり、単振動の様子と合う.`),
     note: note(T`参照円に着目すると $v = \omega\sqrt{R^2 - r^2}$ となり、同じ結果.`),
   }),
@@ -177,7 +177,7 @@ const body = [
     keisan: [eq(T`\sqrt{\frac{R^3}{GM}} = \sqrt{\frac{(6.7\times10^6)^3}{6.7\times10^{-11}\times 1.0\times10^{25}}} = \sqrt{6.7^2\times10^4} = 6.7\times10^2`),
       eq(T`t = 3.1 \times 6.7\times10^2 \approx 2.1\times10^3\ [\mathrm{s}]`),
       eq(T`\frac{2.1\times10^3}{60} \approx 35\ [\text{分}]`)],
-    ans: [p('約 35 分.'), choice('③')],
+    ans: pc('約 35 分', '③'),
     gimmi: p(T`地球 ($R = 6.4\times10^6$ m, $GM = gR^2$) では $\pi\sqrt{R/g} \approx 42$ 分. 同程度なので妥当.`),
   }),
 ].join('\n');
@@ -187,6 +187,6 @@ const html = page({
   lead: '半径 $R$・質量 $M$ の一様な惑星と質量 $m$ の小球。万有引力定数 $G$. 選択問題なので、導出のあとに解答群の番号を書く.',
   body,
 });
-const out = path.join(path.dirname(fileURLToPath(import.meta.url)), MODE === 'fold' ? '2026-p3-1.html' : `2026-p3-1.${MODE}.html`);
+const out = path.join(path.dirname(fileURLToPath(import.meta.url)), MODE === 'show' ? '2026-p3-1.html' : `2026-p3-1.${MODE}.html`);
 fs.writeFileSync(out, html);
 console.log('wrote', out);

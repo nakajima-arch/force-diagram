@@ -14,9 +14,13 @@ export function rich(s) {
   }).join('');
 }
 
-/** 式を1行。no は式番号(①など)。ther=true で行頭に ∴ */
-export const eq = (tex, { no = '', ther = false } = {}) =>
-  `<div class="eq">${ther ? '<span class="th">∴</span>' : ''}<span class="f">${mathHtml('\\displaystyle ' + tex)}</span>${no ? `<span class="no">…${no}</span>` : ''}</div>`;
+/** 式を1行。no は式番号(①など)、ther=true で ∴、lead は式の前に同じ行で置く一言(「①+② より … して」など)、
+ *  ch は行末に同じ行で置く選択肢(「⓪ (エ)」など)。式の説明は TeX の \underbrace{…}_{\displaystyle\text{説明}} で式の下に書く */
+export const eq = (tex, { no = '', ther = false, lead = '', ch = '' } = {}) =>
+  `<div class="eq">${lead ? `<span class="lead">${rich(lead)}</span>` : ''}${ther ? '<span class="th">∴</span>' : ''}<span class="f">${mathHtml('\\displaystyle ' + tex)}</span>${no ? `<span class="no">…${no}</span>` : ''}${ch ? `<span class="ch"><span class="th">∴</span><b>${ch}</b> .</span>` : ''}</div>`;
+
+/** 文章の行の末尾に、同じ行で選択肢を置く */
+export const pc = (text, ch) => `<div class="eq"><span class="lead">${rich(text)}</span><span class="ch"><span class="th">∴</span><b>${ch}</b> .</span></div>`;
 
 /** 見出し(法則名)。note は括弧内の記号の定義 */
 export const head = (name, note = '') =>
@@ -43,22 +47,20 @@ const KEY = { 現象: 'gen', 解法: 'kai', 立式: 'tat', 計算: 'kei', 答: '
 export const step = (name, ...parts) =>
   `<div class="step s-${KEY[name]}"><div class="sl">${name}</div><div class="sb">${parts.flat().join('\n')}</div></div>`;
 
-/** 計算の見せ方: 'fold'(折りたたみ。画面で開ける) | 'open'(全部開く) | 'none'(出さない。答案用) */
-let CALC = 'fold';
-export const setCalc = (m) => { CALC = m; };
+/** 計算の見せ方: 'show'(既定。途中式を小枠で出す) | 'none'(出さない。答案だけを見たいとき) */
+let CALC = 'show';
+export const setCalc = (m) => { CALC = m === 'none' ? 'none' : 'show'; };
 
 /** 小問を6項目で書く。o = { genshou, kaihou, tate, keisan, keisanKeep, ans, gimmi, note }  各値は HTML の配列(または文字列)。
- *  「答案に書く」枠 = 立式 + 答(必要な計算だけ keisanKeep:true で枠に入れる)。
- *  計算(途中式)は答案に書かないので枠の外に出し、折りたたむ。 */
+ *  「答案に書く」枠 = 立式・答。途中の計算は、生徒が計算でつまずくことがあるので載せるが、
+ *  答案には書かないので、枠の中の「答案には書かない」小枠に置く。書くべき計算だけ keisanKeep:true で小枠なしにする. */
 export const qa = (label, o) => {
   const hasCalc = o.keisan && o.keisan !== '—';
-  const inFrame = hasCalc && o.keisanKeep;
-  const outside = hasCalc && !o.keisanKeep && CALC !== 'none'
-    ? `<details class="calc"${CALC === 'open' ? ' open' : ''}><summary>計算(途中式)<span class="nw">答案には書かない</span></summary>${step('計算', o.keisan)}</details>` : '';
+  const calc = !hasCalc ? '' : o.keisanKeep ? step('計算', o.keisan)
+    : CALC === 'none' ? '' : `<div class="calcbox"><span class="ctag">答案には書かない</span>${step('計算', o.keisan)}</div>`;
   return sub(label,
     step('現象', o.genshou ?? '—'), step('解法', o.kaihou ?? '—'),
-    `<div class="written"><span class="wtag">答案に書く</span>${step('立式', o.tate ?? '—')}${inFrame ? step('計算', o.keisan) : ''}${step('答', o.ans ?? '—')}</div>`,
-    outside,
+    `<div class="written"><span class="wtag">答案に書く</span>${step('立式', o.tate ?? '—')}${calc}${step('答', o.ans ?? '—')}</div>`,
     step('吟味', o.gimmi ?? '—'),
     o.note ?? '');
 };
@@ -93,10 +95,10 @@ mark.src{background:#FFF1A8;color:inherit;padding:0 .1em}
 .written{position:relative;margin:.6em 0 .4em;padding:.3em .6em;border:1px solid #9FB3CC;background:#F4F7FB;border-radius:4px}
 .wtag{position:absolute;right:.6em;top:-.85em;background:#fff;border:1px solid #9FB3CC;border-radius:3px;padding:0 .4em;color:#33516F}
 .step>.sb{flex:1;min-width:0}
-details.calc{margin:.3em 0}
-details.calc>summary{cursor:pointer;color:#7A6200;font-weight:700;list-style-position:inside}
-details.calc>summary .nw{margin-left:.8em;font-weight:400;color:#777}
-details.calc[open]>summary{margin-bottom:.2em}
+.calcbox{position:relative;margin:.55em 0 .4em;padding:.25em .6em;border:1px dashed #A8A8A8;background:#fff;border-radius:4px}
+.ctag{position:absolute;right:.6em;top:-.85em;background:#fff;border:1px dashed #A8A8A8;border-radius:3px;padding:0 .4em;color:#666}
+.eq .lead{margin-right:.2em}
+.eq .ch{margin-left:1.4em}
 .step .eq,.step p{margin-left:0}
 .head{margin:2px 0 2px}
 .head:first-child{margin-top:0}
