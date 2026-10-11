@@ -34,6 +34,7 @@ const mj = mathjax.document('', {
 /** TeX を入れ子の <svg> にして返す。(x,y) は文字の基線上の位置。anchor: start | middle | end */
 export function tex(x, y, src, { size = FS, color = C.ink, anchor = 'start' } = {}) {
   const html = adaptor.innerHTML(mj.convert(src, { display: false }));
+  if (html.includes('data-mml-node="merror"')) throw new Error('数式のエラー: ' + src);
   const m = (re) => html.match(re);
   const w = parseFloat(m(/width="([\d.]+)ex"/)[1]);
   const h = parseFloat(m(/height="([\d.]+)ex"/)[1]);
@@ -146,6 +147,7 @@ export const figure = (w, h, body, { bg = true } = {}) =>
 /** 文章の中に置く数式(インライン)。TeX を <svg> にして返す。基線は文字にそろう */
 export function mathHtml(src, { color = null } = {}) {
   const html = adaptor.innerHTML(mj.convert(src, { display: false }));
+  if (html.includes('data-mml-node="merror"')) throw new Error('数式のエラー: ' + src);
   const m = (re) => html.match(re);
   const w = parseFloat(m(/width="([\d.]+)ex"/)[1]);
   const h = parseFloat(m(/height="([\d.]+)ex"/)[1]);
