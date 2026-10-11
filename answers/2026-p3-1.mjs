@@ -155,7 +155,7 @@ const body = [
     tate: eq(T`2GM - v^2R \le 0`),
     keisan: eq(T`v^2 \ge \frac{2GM}{R}`),
     ans: eq(T`v \ge \sqrt{\frac{2GM}{R}}`, { ther: true, ch: '④' }),
-    gimmi: p(T`$v = \sqrt{2GM/R}$ は脱出速度で、(ウ) はこの境界を含む。全エネルギー $\frac12 mv^2 - \frac{GMm}{R} \ge 0$ でも同じ結果になる.`),
+    gimmi: p(T`$v = \sqrt{\frac{2GM}{R}}$ は脱出速度で、(ウ) はこの境界を含む。全エネルギー $\frac12 mv^2 - \frac{GMm}{R} \ge 0$ でも同じ結果になる.`),
   }),
 
   qa('(2)(a) エ オ', {
@@ -203,7 +203,7 @@ const body = [
     tate: eq(T`t = \underbracket[0.4pt][2pt]{\frac T2}_{\displaystyle\text{半周期}} = \frac{\pi}{\omega}`),
     keisan: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`),
     ans: eq(T`t = \pi\sqrt{\frac{R^3}{GM}}`, { ther: true, ch: '⓪' }),
-    gimmi: p(T`$m$ によらない。$\sqrt{R^3/GM}$ は時間の次元になる.`),
+    gimmi: p(T`$m$ によらない。$\sqrt{\frac{R^3}{GM}}$ は時間の次元になる.`),
   }),
 
   qa('シ', {
@@ -214,7 +214,7 @@ const body = [
       eq(T`\underbracket[0.4pt][2pt]{\frac12 mv^2}_{\displaystyle\text{②の運動エネルギー}} + \underbracket[0.4pt][2pt]{\frac12\cdot\frac{GMm}{R^3}\,r^2}_{\displaystyle\text{②の位置エネルギー}} = \underbracket[0.4pt][2pt]{\frac12\cdot\frac{GMm}{R^3}\,R^2}_{\displaystyle\text{①の位置エネルギー}}`)],
     keisan: eq(T`v^2 = \frac{GM}{R^3}\,(R^2 - r^2)`),
     ans: eq(T`v = \sqrt{\frac{GM}{R}\left(1 - \frac{r^2}{R^2}\right)}`, { ther: true, ch: '②' }),
-    gimmi: p(T`$r = R$ で $v = 0$(端で静止)、$r = 0$ で最大 $v = \sqrt{GM/R}$ となり、単振動の様子と合う.`),
+    gimmi: p(T`$r = R$ で $v = 0$(端で静止)、$r = 0$ で最大 $v = \sqrt{\frac{GM}{R}}$ となり、単振動の様子と合う.`),
     note: note(T`参照円に着目すると、点の速さ $R\omega$ の $x$ 方向の成分が $v = R\omega\sin\omega t = \omega\sqrt{R^2 - r^2}$ となり、同じ結果.`),
   }),
 
@@ -227,7 +227,7 @@ const body = [
       eq(T`t = 3.1 \times 6.7\times10^2 \approx 2.1\times10^3\ [\mathrm{s}]`),
       eq(T`\frac{2.1\times10^3}{60} \approx 35\ [\text{分}]`)],
     ans: pc('約 35 分', '③'),
-    gimmi: p(T`地球 ($R = 6.4\times10^6$ m, $GM = gR^2$) では $\pi\sqrt{R/g} \approx 42$ 分. 同程度なので妥当.`),
+    gimmi: p(T`地球 ($R = 6.4\times10^6$ m, $GM = gR^2$) では $\pi\sqrt{\frac{R}{g}} \approx 42$ 分. 同程度なので妥当.`),
   }),
 ].join('\n');
 

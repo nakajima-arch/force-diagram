@@ -21,7 +21,14 @@ export const C = {
 
 // ---- 文字の大きさ(図の中は全部この2つに統一) ----
 export const FS = 22;   // 数式・記号
-export const JS = 16;   // 日本語
+export const JS = 22;   // 日本語(数式と同じ大きさ。表示すると本文と同じ大きさになる)
+
+
+/** 数式に「/」の分数が残っていないか調べる(\text{…}・\mathrm{…} の中の単位は除く)。分数は \frac{分子}{分母} で書く */
+function noSlashFraction(src) {
+  const stripped = src.replace(/\\(text|mathrm)\{[^}]*\}/g, '');
+  if (/\//.test(stripped)) throw new Error('分数は「/」ではなく \\frac{分子}{分母} で書く: ' + src);
+}
 
 // ---- 数式 ----
 const adaptor = liteAdaptor();
@@ -33,6 +40,7 @@ const mj = mathjax.document('', {
 
 /** TeX を入れ子の <svg> にして返す。(x,y) は文字の基線上の位置。anchor: start | middle | end */
 export function tex(x, y, src, { size = FS, color = C.ink, anchor = 'start' } = {}) {
+  noSlashFraction(src);
   const html = adaptor.innerHTML(mj.convert(src, { display: false }));
   if (html.includes('data-mml-node="merror"')) throw new Error('数式のエラー: ' + src);
   const m = (re) => html.match(re);
@@ -146,6 +154,7 @@ export const figure = (w, h, body, { bg = true } = {}) =>
 
 /** 文章の中に置く数式(インライン)。TeX を <svg> にして返す。基線は文字にそろう */
 export function mathHtml(src, { color = null } = {}) {
+  noSlashFraction(src);
   const html = adaptor.innerHTML(mj.convert(src, { display: false }));
   if (html.includes('data-mml-node="merror"')) throw new Error('数式のエラー: ' + src);
   const m = (re) => html.match(re);

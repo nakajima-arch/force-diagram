@@ -4,7 +4,7 @@ import { mathHtml, C } from './draw.mjs';
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const mathSplit = (s) => s.split('$').map((t, i) => (i % 2 ? mathHtml(t) : esc(t))).join('');
+const mathSplit = (s) => s.split('$').map((t, i) => (i % 2 ? mathHtml(t.includes('\\frac') ? '\\displaystyle ' + t : t) : esc(t))).join('');
 /** 文章を HTML にする。$...$ は数式、[[...]] は問題文の引用(マーカー) */
 export function rich(s) {
   return s.split('[[').map((seg, i) => {
