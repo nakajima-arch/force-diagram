@@ -67,16 +67,23 @@ const figRocket = () => {
 
 /** 大問3(1): 床ではねかえる小球(落下 → 衝突直前 14 m/s → 直後 7.0 m/s → 上昇) */
 const figBounce = () => {
-  const fy = 260;
-  let s = line(20, fy, 380, fy, { color: C.wall, w: 3 });
-  s += ball(90, 46, 12) + line(90, 60, 90, fy - 30, { w: 1.1, dash: '5 4' }) + L(60, 150, 'h', C.ink, 'end');
-  s += line(72, 46, 72, fy, { w: 1.4 });
-  s += ball(110, fy - 18, 12) + arrow(110, fy - 100, 110, fy - 36, { w: 3.4 });
-  s += L(124, fy - 62, T`14\ \mathrm{m/s}`) + jp(70, 24, '落下', { color: C.label });
-  s += ball(290, fy - 18, 12) + arrow(290, fy - 36, 290, fy - 106, { w: 3.4 }) + L(304, fy - 66, T`7.0\ \mathrm{m/s}`);
-  s += ball(290, fy - 18 - 66, 12, { color: '#fff' }) + line(250, fy - 84, 250, fy, { w: 1.4 }) + L(240, fy - 40, T`h'`, C.ink, 'end') + jp(250, 24, 'はね上がり', { color: C.label });
-  s += jp(206, 288, '上向きを正とする', { anchor: 'middle', size: JS });
-  return figure(400, 300, s);
+  const fy = 300, r = 13, top = 56, rise = 112;                       // 床の高さ、小球の半径、落とす高さ、はね上がる高さ(図は縮尺どおりでない)
+  const yb = fy - r;                                                  // 床にふれる位置の中心
+  let s = line(20, fy, 520, fy, { color: C.wall, w: 3 });
+  // 落下(左の列)。↕ で h を示す
+  s += jp(30, 28, '落下', { color: C.label }) + ball(150, top, r) + jp(172, top + 6, '止', { size: JS });
+  s += line(150, top + r, 150, yb - r, { w: 1.2, dash: '5 4' }) + ball(150, yb, r);
+  s += arrow(120, (top + yb) / 2, 120, top, { w: 2 }) + arrow(120, (top + yb) / 2, 120, yb, { w: 2 }) + L(106, (top + yb) / 2 + 8, 'h', C.ink, 'end');
+  s += line(110, top, 134, top, { w: 1.2 }) + line(110, yb, 134, yb, { w: 1.2 });
+  s += arrow(182, yb - 118, 182, yb - 24, { w: 3.4 }) + L(196, yb - 62, T`14\ \mathrm{m/s}`);                 // 衝突の直前(下向き)
+  // はね上がり(右の列)。↕ で h' を示す
+  s += jp(330, 28, 'はね上がり', { color: C.label }) + ball(400, yb, r);
+  s += arrow(432, yb - 20, 432, yb - 110, { w: 3.4 }) + L(446, yb - 58, T`7.0\ \mathrm{m/s}`);                 // 衝突の直後(上向き)
+  s += line(400, yb - r, 400, yb - rise + r, { w: 1.2, dash: '5 4' }) + ball(400, yb - rise, r) + jp(422, yb - rise + 6, '止', { size: JS });
+  s += arrow(366, (yb + yb - rise) / 2, 366, yb - rise, { w: 2 }) + arrow(366, (yb + yb - rise) / 2, 366, yb, { w: 2 }) + L(352, (yb + yb - rise) / 2 + 8, T`h'`, C.ink, 'end');
+  s += line(358, yb, 382, yb, { w: 1.2 }) + line(358, yb - rise, 382, yb - rise, { w: 1.2 });
+  s += jp(20, 334, '小球は鉛直に運動する', { size: JS }) + jp(20, 362, '(落下とはね上がりを、横にずらして描いている)', { size: JS });
+  return figure(540, 376, s);
 };
 
 /** 大問5: 台車 A がばねつきの台車 B に衝突する。①接触前 ②ばねが最大に縮んだ(両台車の速度が等しい) ③ A がばねから離れた後 */
@@ -193,7 +200,7 @@ const body = [
 
   // ---------------- 大問3 ----------------
   qa('3 (1)(a)', {
-    genshou: [fig(figBounce(), { cap: '小球を高さ $h$ から自由落下させ、床ではね返って高さ $h\'$ まで上がる。上向きを正とする' }),
+    genshou: [fig(figBounce(), { cap: '小球を高さ $h$ から静かにはなし(止)、床ではね返って高さ $h\'$ まで上がる(図は縮尺どおりでない)' }),
       p('衝突の直前は下向きに $14\\ \\mathrm{m/s}$、直後は上向きに $7.0\\ \\mathrm{m/s}$.')],
     kaihou: p('[[水平な床ではねかえり]] → 床は静止しているので、反発係数は「衝突前後の速さの比」(はねかえりの式).'),
     tate: [head('はねかえりの式(上向きを正)'), eq(T`e = -\frac{(+7.0) - 0}{(-14) - 0}`)],
@@ -221,7 +228,7 @@ const body = [
   }),
 
   qa('(2)(a)', {
-    genshou: [fig(figColl({ names: ['P', 'Q'], masses: [T`4.0\ \mathrm{kg}`, T`m`], before: [21, -14], after: [-3.0, 2.0], labelsB: [T`21`, T`14`], labelsA: [T`3.0`, T`2.0`], scale: 8 }), { cap: '右向きを正とする。P は右へ $21$、Q は左へ $14$。衝突後は P は左へ $3.0$、Q は右へ $2.0$' })],
+    genshou: [fig(figColl({ names: ['P', 'Q'], masses: [T`4.0\ \mathrm{kg}`, T`m`], before: [21, -14], after: [-3.0, 2.0], labelsB: [T`21`, T`14`], labelsA: [T`3.0`, T`2.0`], scale: 5 }), { cap: '右向きを正とする。P は右へ $21$、Q は左へ $14$。衝突後は P は左へ $3.0$、Q は右へ $2.0$' })],
     kaihou: p('[[一直線上を…質点Pと…質点Qが衝突]] → 運動量保存則(右向きを正).'),
     tate: [head('運動量保存則(右向きを正)', '$m$:Q の質量'),
       eq(T`${U('4.0\\times21 + m\\times(-14)')}_{\\displaystyle\\text{衝突前}} = ${U('4.0\\times(-3.0) + m\\times2.0')}_{\\displaystyle\\text{衝突後}}`.replace(/\\\\/g, '\\'))],

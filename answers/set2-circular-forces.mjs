@@ -15,107 +15,108 @@ const L = (x, y, src, color = C.ink, anchor = 'start') => tex(x, y, src, { color
 const INERT = C.inertia;                       // 慣性力(遠心力)は朱
 
 // ============ 図 ============
-/** 大問1・2: 円運動(上から見た図)。物体は右端、速度は上向き、加速度は中心向き */
-const figCircle = ({ r = '5.0\\ \\mathrm{m}', v = T`v`, withA = true, vLab = null } = {}) => {
-  const O = [130, 130], R = 100;
-  let s = circ(O[0], O[1], R, { fill: 'none', w: 1.6 }) + dot(...O, 3, C.ink) + line(...O, O[0] + R, O[1], { w: 1.4 }) + L(O[0] + R / 2, O[1] + 24, r, C.ink, 'middle');
-  s += ball(O[0] + R, O[1], 12) + arrow(O[0] + R, O[1] - 14, O[0] + R, O[1] - 76, { w: 2.2 }) + L(O[0] + R + 10, O[1] - 52, vLab ?? v);
-  if (withA) s += accel(O[0] + R - 16, O[1], O[0] + R - 70, O[1]) + L(O[0] + R - 44, O[1] - 16, 'a', C.force, 'middle');
-  return figure(300, 260, s);
+/** 大問1・2: 円運動(上から見た図)。速度は円の接線方向、加速度は中心向き。withF なら、糸の張力 F(物体と糸の接触点から)も描く */
+const figCircle = ({ r = '5.0\\ \\mathrm{m}', vLab = T`v`, withA = true, withF = false } = {}) => {
+  const O = [130, 130], R = 100, rb = 13;
+  let s = circ(O[0], O[1], R, { fill: 'none', w: 1.6 }) + dot(...O, 3, C.ink) + L(O[0] + R / 2, O[1] + 26, r, C.ink, 'middle');
+  s += line(O[0], O[1], O[0] + R - rb, O[1], { w: 1.2, color: '#9A9A9A' });                           // 糸(うすい線)
+  s += ball(O[0] + R, O[1], rb) + arrow(O[0] + R, O[1] - 18, O[0] + R, O[1] - 90, { w: 3 }) + L(O[0] + R + 12, O[1] - 56, vLab);
+  if (withF) s += force(O[0] + R - rb, O[1], O[0] + R - rb - 64, O[1]) + L(O[0] + R - rb - 34, O[1] - 12, 'F', C.force, 'middle');   // 張力:接触点(物体の糸側)から中心へ
+  if (withA) s += accel(O[0] + R - 20, O[1] + 36, O[0] + R - 84, O[1] + 36) + L(O[0] + R - 52, O[1] + 66, 'a', C.force, 'middle');      // 加速度:力と重ならないように下にずらす
+  return figure(360, 270, s);
 };
 
-/** 大問3: 円すい振り子。上から見ると半径 r、横から見ると糸が鉛直と θ。小球とともに回る観測者から見た力 */
+/** 大問3: 円すい振り子。小球とともに回る観測者から見た力。張力 S は糸の線から少しずらして描く */
 const figConical = () => {
-  const P = [120, 30], th = Math.PI / 6, Lg = 130;
+  const P = [140, 30], th = Math.PI / 6, Lg = 150;
   const B = [P[0] + Lg * Math.sin(th), P[1] + Lg * Math.cos(th)];
-  let s = line(60, 30, 180, 30, { color: C.wall, w: 3 }) + L(P[0] - 14, 24, 'p', C.ink, 'end');
-  s += line(...P, P[0], B[1] + 30, { w: 1.2, dash: '5 4' }) + line(P[0], B[1], B[0], B[1], { w: 1.2, dash: '5 4' }) + L(P[0] + 32, B[1] + 22, 'r', C.ink, 'middle') + L(P[0] - 14, B[1] + 6, T`\mathrm{o}`, C.ink, 'end');
-  s += line(...P, ...B, { w: 2 }) + arc(P[0], P[1], 40, 270, 270 + 30, {}) + L(P[0] + 4, P[1] + 56, T`\theta`);
-  s += ball(...B, 11);
-  // 小球とともに回る観測者から見て: 糸の張力 S(糸に沿って p へ)、重力 mg、遠心力 mrω²(外向き)
-  s += force(...B, B[0] - 70 * Math.sin(th), B[1] - 70 * Math.cos(th)) + dot(...B, 3) + L(B[0] - 70 * Math.sin(th) - 6, B[1] - 70 * Math.cos(th) - 6, 'S', C.force, 'end');
-  s += force(...B, B[0], B[1] + 70) + L(B[0] + 8, B[1] + 80, 'mg', C.force);
-  s += arrow(...B, B[0] + 76, B[1], { color: INERT, w: 2.8 }) + L(B[0] + 80, B[1] + 6, T`mr\omega^2`, INERT);
-  return figure(330, 250, s);
+  const dir = [-Math.sin(th), -Math.cos(th)], nrm = [Math.cos(th), -Math.sin(th)];          // 小球から p へ向かう向き、その法線
+  let s = line(70, 30, 210, 30, { color: C.wall, w: 3 }) + L(P[0] - 14, 24, 'p', C.ink, 'end');
+  s += line(...P, P[0], B[1] + 36, { w: 1.2, dash: '5 4' }) + line(P[0], B[1], B[0], B[1], { w: 1.2, dash: '5 4' }) + L(P[0] + 40, B[1] + 24, 'r', C.ink, 'middle') + L(P[0] - 14, B[1] + 8, T`\mathrm{o}`, C.ink, 'end');
+  s += line(...P, ...B, { w: 1.6, color: '#9A9A9A' }) + arc(P[0], P[1], 44, 270, 270 + 30, {}) + L(P[0] + 4, P[1] + 62, T`\theta`);
+  s += ball(...B, 13);
+  const k = 16, S0 = [B[0] + dir[0] * 13 - nrm[0] * k, B[1] + dir[1] * 13 - nrm[1] * k];        // 張力の矢印:糸から k だけずらして並べる
+  s += force(...S0, S0[0] + dir[0] * 74, S0[1] + dir[1] * 74) + L(S0[0] + dir[0] * 74 - 8, S0[1] + dir[1] * 74 - 6, 'S', C.force, 'end');
+  s += force(...B, B[0], B[1] + 74) + dot(...B, 3) + L(B[0] + 10, B[1] + 86, 'mg', C.force);
+  s += arrow(...B, B[0] + 80, B[1], { color: INERT, w: 2.8 }) + L(B[0] + 86, B[1] + 8, T`mr\omega^2`, INERT);
+  return figure(360, 270, s);
 };
 
-/** 大問4: 円筒面の一部。A から B へすべる。B の直前に、小球とともに円運動する観測者から見た力(N₁ = 3mg、mg、遠心力 mv²/r = 2mg。長さは大きさに比例) */
+/** 大問4: 円筒面の一部。A(止、速さ 0)から B(速さ v)へすべる。力は小球の中から描く。B で円運動の加速度(中心向き = 上向き)を描く */
 const figQuarter = () => {
-  const O = [270, 70], R = 220;
+  const O = [290, 80], R = 220, rb = 17;
   let s = line(O[0] - R - 30, O[1] + R, O[0] + 150, O[1] + R, { color: C.wall, w: 2.6 });
   s += arc(O[0], O[1], R, 180, 270, { w: 2.6 });
-  s += dot(...O, 3, C.ink) + L(O[0] + 10, O[1] - 8, T`\mathrm{O}`) + line(...O, O[0], O[1] + R, { w: 1.2, dash: '5 4' }) + L(O[0] + 12, O[1] + R / 2, 'r');
-  s += ball(O[0] - R, O[1], 12) + L(O[0] - R - 18, O[1] + 6, 'A', C.ink, 'end') + L(O[0] - R, O[1] - 20, 'm', C.ink, 'middle');
-  s += L(O[0] + 110, O[1] + R + 24, 'B', C.ink, 'start');
-  // B の直前: 小球と、小球が受ける力(3 本を横にずらして描く)
-  const B = [O[0] - 8, O[1] + R - 13];
-  s += ball(...B, 12);
-  s += force(B[0] - 40, B[1] + 12, B[0] - 40, B[1] + 12 - 90) + dot(B[0] - 40, B[1] + 12, 3) + L(B[0] - 50, B[1] - 66, T`N_1`, C.force, 'end');
-  s += force(...B, B[0], B[1] + 30) + dot(...B, 3) + L(B[0] - 10, B[1] + 52, 'mg', C.force, 'end');
-  s += arrow(B[0] + 40, B[1], B[0] + 40, B[1] + 60, { color: INERT, w: 2.8 }) + L(B[0] + 52, B[1] + 44, T`m\frac{v^2}{r}`, INERT);
-  return figure(480, 340, s);
+  s += dot(...O, 3, C.ink) + L(O[0] + 10, O[1] - 8, T`\mathrm{O}`) + line(...O, O[0], O[1] + R - 30, { w: 1.2, dash: '5 4' }) + L(O[0] + 12, O[1] + R / 2, 'r');
+  // A: 止(速さ 0)
+  s += ball(O[0] - R, O[1], rb) + L(O[0] - R - 24, O[1] + 6, 'A', C.ink, 'end') + jp(O[0] - R + 26, O[1] + 6, '止(速さ 0)', { size: JS });
+  // B: 速さ v(右向き)、力は小球の中から。N₁(上)、mg(下)、加速度は上向き(中心向き)
+  const B = [O[0] - 4, O[1] + R - rb - 2];
+  s += ball(...B, rb) + L(B[0] + 60, O[1] + R + 28, 'B', C.ink, 'start');
+  s += arrow(B[0] + 24, B[1] + 2, B[0] + 120, B[1] + 2, { w: 3.2 }) + L(B[0] + 72, B[1] - 12, 'v', C.ink, 'middle');
+  s += force(B[0] - 7, B[1], B[0] - 7, B[1] - 94) + dot(B[0] - 7, B[1], 3) + L(B[0] - 20, B[1] - 66, T`N_1`, C.force, 'end');
+  s += force(B[0] + 7, B[1], B[0] + 7, B[1] + 32) + dot(B[0] + 7, B[1], 3) + L(B[0] + 20, B[1] + 34, 'mg', C.force);
+  s += accel(B[0] - 70, B[1] + 6, B[0] - 70, B[1] - 72) + L(B[0] - 84, B[1] - 34, 'a', C.force, 'end');
+  return figure(520, 360, s);
 };
 
-/** 大問5: 半球面。点 P(角 θ)で、小球とともに動く観測者から見た力(重力 mg、垂直抗力 N、遠心力 mv²/R)。半径方向に N と遠心力、重力は鉛直下向き */
+/** 大問5: 半球面。点 P(角 θ)。力(mg、N)は小球の中から描く。速さ v(接線方向)、加速度 a(中心 O 向き) */
 const figHemi = () => {
-  const O = [210, 300], R = 230, th = Math.PI / 6;
-  let s = line(20, O[1], 420, O[1], { color: C.wall, w: 2.6 }) + arc(O[0], O[1], R, 0, 180, { w: 2.6 });
-  s += dot(...O, 3, C.ink) + L(O[0] + 10, O[1] + 22, T`\mathrm{O}`) + L(O[0] - 8, O[1] - R - 12, 'A', C.ink, 'end');
-  const P = [O[0] + R * Math.sin(th), O[1] - R * Math.cos(th)];
+  const O = [230, 310], R = 230, th = Math.PI / 6, rb = 17;
+  let s = line(20, O[1], 440, O[1], { color: C.wall, w: 2.6 }) + arc(O[0], O[1], R, 0, 180, { w: 2.6 });
+  s += dot(...O, 3, C.ink) + L(O[0] + 10, O[1] + 22, T`\mathrm{O}`) + L(O[0] - 8, O[1] - R - 12, 'A', C.ink, 'end') + jp(O[0] + 12, O[1] - R - 8, '止', { size: JS });
+  const P = [O[0] + (R - rb + 2) * Math.sin(th), O[1] - (R - rb + 2) * Math.cos(th)];           // 球の中心(半球の面の上)
   s += line(...O, O[0], O[1] - R, { w: 1.2, dash: '5 4' }) + line(...O, ...P, { w: 1.2, dash: '5 4' }) + arc(O[0], O[1], 70, 90, 60) + L(O[0] + 6, O[1] - 76, T`\theta`);
-  s += ball(...P, 12) + L(P[0] + 18, P[1] - 16, 'P', C.ink);
-  const rr = [Math.sin(th), -Math.cos(th)], tt = [Math.cos(th), Math.sin(th)];        // OP 方向(外向き)、接線方向
-  const sh = (v, k) => [P[0] + tt[0] * k + v[0] * 0, P[1] + tt[1] * k + v[1] * 0];
-  // N(OP 方向・外向き。接線方向にずらして描く)
-  const Pn = [P[0] - tt[0] * 26, P[1] - tt[1] * 26];
-  s += force(...Pn, Pn[0] + rr[0] * 70, Pn[1] + rr[1] * 70) + dot(...Pn, 3) + L(Pn[0] + rr[0] * 70 - 8, Pn[1] + rr[1] * 70 - 8, 'N', C.force, 'end');
-  // 遠心力(OP 方向・外向き)
-  const Pc = [P[0] + tt[0] * 26, P[1] + tt[1] * 26];
-  s += arrow(...Pc, Pc[0] + rr[0] * 56, Pc[1] + rr[1] * 56, { color: INERT, w: 2.8 }) + L(Pc[0] + rr[0] * 56 + 10, Pc[1] + rr[1] * 56 + 6, T`m\frac{v^2}{R}`, INERT);
-  // 重力(重心から鉛直下向き)
-  s += force(...P, P[0], P[1] + 80) + dot(...P, 3) + L(P[0] + 10, P[1] + 92, 'mg', C.force);
-  return figure(440, 340, s);
+  s += ball(...P, rb) + L(P[0] + 22, P[1] - 22, 'P', C.ink);
+  const rr = [Math.sin(th), -Math.cos(th)], tt = [Math.cos(th), Math.sin(th)];                  // 外向き、接線方向(下り)
+  s += arrow(P[0] + tt[0] * 24, P[1] + tt[1] * 24, P[0] + tt[0] * 110, P[1] + tt[1] * 110, { w: 3.2 }) + L(P[0] + tt[0] * 110 + 8, P[1] + tt[1] * 110 + 4, 'v');     // 速さ(面に沿って下る向き)
+  s += force(P[0] - 8, P[1], P[0] - 8 + rr[0] * 76, P[1] + rr[1] * 76) + dot(P[0] - 8, P[1], 3) + L(P[0] - 8 + rr[0] * 76 - 6, P[1] + rr[1] * 76 - 6, 'N', C.force, 'end');   // 垂直抗力(小球の中から外向き)
+  s += force(...P, P[0], P[1] + 76) + dot(...P, 3) + L(P[0] + 12, P[1] + 92, 'mg', C.force);
+  s += accel(P[0] - rr[0] * 36 - tt[0] * 52, P[1] - rr[1] * 36 - tt[1] * 52, P[0] - rr[0] * 96 - tt[0] * 52, P[1] - rr[1] * 96 - tt[1] * 52) + L(P[0] - rr[0] * 96 - tt[0] * 52 - 10, P[1] - rr[1] * 96 - tt[1] * 52 + 6, 'a', C.force, 'end');  // 加速度(O 向き)
+  return figure(460, 360, s);
 };
 
-/** 大問6: 3つの小球 A, B, C をつなぎ、A を力 F で引き上げる。力の図(力の長さは大きさに比例) */
+/** 大問6: 3つの小球 A, B, C を糸でつなぎ、A を力 F で引き上げる。力の長さは大きさに比例。張力は物体と糸の接触点から、加速度は物体ごと */
 const figThree = () => {
-  const x = 200, ys = [90, 230, 400], rs = [18, 24, 32], names = ['A', 'B', 'C'], ms = ['m', '2m', '3m'];
+  const x = 200, ys = [90, 230, 400], rs = [20, 26, 34], names = ['A', 'B', 'C'], ms = ['m', '2m', '3m'];
   let s = '';
-  ys.forEach((y, i) => { s += ball(x, y, rs[i]) + L(x - 70, y + 7, names[i], C.ink, 'end') + L(x + 6, y + 7, ms[i], C.ink, 'start'); });
-  s += line(x, ys[0] + rs[0], x, ys[1] - rs[1], { w: 1.8 }) + jp(x + 70, 168, '糸 1', { size: JS }) + line(x, ys[1] + rs[1], x, ys[2] - rs[2], { w: 1.8 }) + jp(x + 70, 320, '糸 2', { size: JS });
-  // F
+  s += line(x, ys[0] + rs[0], x, ys[1] - rs[1], { w: 1.4, color: '#B0B0B0' }) + line(x, ys[1] + rs[1], x, ys[2] - rs[2], { w: 1.4, color: '#B0B0B0' });
+  ys.forEach((y, i) => { s += ball(x, y, rs[i]) + L(x - 78, y + 7, names[i], C.ink, 'end') + L(x + 36, y + 7, ms[i], C.ink, 'start'); });
+  s += jp(x + 62, 168, '糸 1', { size: JS }) + jp(x + 62, 322, '糸 2', { size: JS });
   s += force(x, ys[0] - rs[0], x, 8) + L(x + 12, 28, 'F', C.force);
-  // 重力 mg(重心から下向き。長さは質量に比例)
-  [40, 80, 120].forEach((len, i) => { s += force(x - 18, ys[i], x - 18, ys[i] + len) + dot(x - 18, ys[i], 3); });
-  s += L(x - 26, ys[0] + 52, 'mg', C.force, 'end') + L(x - 26, ys[1] + 92, '2mg', C.force, 'end') + L(x - 26, ys[2] + 132, '3mg', C.force, 'end');
-  // 張力(糸が球を引く)。球の上側は上向き、下側は下向き
-  s += force(x + 18, ys[0] + rs[0], x + 18, ys[0] + rs[0] + 36) + L(x + 30, ys[0] + rs[0] + 34, T`T_1`, C.force);
-  s += force(x + 18, ys[1] - rs[1], x + 18, ys[1] - rs[1] - 36) + L(x + 30, ys[1] - rs[1] - 22, T`T_1`, C.force);
-  s += force(x + 18, ys[1] + rs[1], x + 18, ys[1] + rs[1] + 36) + L(x + 30, ys[1] + rs[1] + 34, T`T_2`, C.force);
-  s += force(x + 18, ys[2] - rs[2], x + 18, ys[2] - rs[2] - 36) + L(x + 30, ys[2] - rs[2] - 22, T`T_2`, C.force);
-  ys.forEach((y, i) => { s += accel(300, y + 40, 300, y - 40) + L(316, y + 8, 'a', C.force); });          // 加速度は物体ごと(上向きが正)
+  // 重力 mg(重心から下向き)
+  [40, 80, 120].forEach((len, i) => { s += force(x - 16, ys[i], x - 16, ys[i] + len) + dot(x - 16, ys[i], 3); });
+  s += L(x - 26, ys[0] + 58, 'mg', C.force, 'end') + L(x - 26, ys[1] + 98, '2mg', C.force, 'end') + L(x - 26, ys[2] + 138, '3mg', C.force, 'end');
+  // 張力: 糸と物体の接触点(球の上端・下端)から。糸の線から少し右へずらして並べる
+  const tl = 40, dx = 12;
+  s += force(x + dx, ys[0] + rs[0] - 4, x + dx, ys[0] + rs[0] - 4 + tl) + dot(x + dx, ys[0] + rs[0] - 4, 3) + L(x + dx + 12, ys[0] + rs[0] + 30, T`T_1`, C.force);
+  s += force(x + dx, ys[1] - rs[1] + 4, x + dx, ys[1] - rs[1] + 4 - tl) + dot(x + dx, ys[1] - rs[1] + 4, 3) + L(x + dx + 12, ys[1] - rs[1] - 24, T`T_1`, C.force);
+  s += force(x + dx, ys[1] + rs[1] - 4, x + dx, ys[1] + rs[1] - 4 + tl) + dot(x + dx, ys[1] + rs[1] - 4, 3) + L(x + dx + 12, ys[1] + rs[1] + 30, T`T_2`, C.force);
+  s += force(x + dx, ys[2] - rs[2] + 4, x + dx, ys[2] - rs[2] + 4 - tl) + dot(x + dx, ys[2] - rs[2] + 4, 3) + L(x + dx + 12, ys[2] - rs[2] - 24, T`T_2`, C.force);
+  ys.forEach((y) => { s += accel(320, y + 40, 320, y - 40) + L(336, y + 8, 'a', C.force); });
   return figure(420, 580, s);
 };
 
-/** 大問7: ばねでつながった小球 1, 2。糸をはなす前(つりあい)とはなした直後。小球ごとに力を左右に分けて描く */
+/** 大問7: ばねでつながった小球 1, 2。糸をはなす前(つりあい)とはなした直後。力は小球の中から描く */
 const figSpring2 = () => {
-  const sp = (x, y1, y2) => { const pts = [[x, y1]]; const n = 14; for (let i = 1; i < n; i++) pts.push([x + (i % 2 ? 10 : -10), y1 + ((y2 - y1) * i) / n]); pts.push([x, y2]); return curve(pts, { w: 2 }); };
+  const sp = (x, y1, y2) => { const pts = [[x, y1]]; const n = 14; for (let i = 1; i < n; i++) pts.push([x + (i % 2 ? 11 : -11), y1 + ((y2 - y1) * i) / n]); pts.push([x, y2]); return curve(pts, { w: 2 }); };
   let s = jp(10, 26, '(1) はなす前', { color: C.label }) + jp(300, 26, '(2) はなした直後', { color: C.label });
+  const rb = 18;
   const panel = (x0, withT) => {
     let q = '';
     const y1 = 150, y2 = 340;
-    q += ball(x0, y1, 14) + ball(x0, y2, 14) + sp(x0, y1 + 14, y2 - 14) + L(x0 - 70, y1 + 8, '小球 1', C.ink, 'end') + L(x0 - 70, y2 + 8, '小球 2', C.ink, 'end');
-    if (withT) q += line(x0, y1 - 14, x0, 60, { w: 1.8 }) + force(x0 + 18, y1 - 8, x0 + 18, y1 - 78) + L(x0 + 30, y1 - 52, 'T', C.force);
-    // 小球 1: mg(下、重心から)、ks(下、ばねから)
-    q += force(x0 - 22, y1, x0 - 22, y1 + 56) + dot(x0 - 22, y1, 3) + L(x0 - 30, y1 + 80, 'mg', C.force, 'end');
-    q += force(x0 + 22, y1 + 10, x0 + 22, y1 + 66) + L(x0 + 32, y1 + 62, 'ks', C.force);
-    // 小球 2: mg(下)、ks(上、ばねから)
-    q += force(x0 - 22, y2, x0 - 22, y2 + 56) + dot(x0 - 22, y2, 3) + L(x0 - 30, y2 + 80, 'mg', C.force, 'end');
-    q += force(x0 + 22, y2 - 10, x0 + 22, y2 - 66) + L(x0 + 32, y2 - 40, 'ks', C.force);
+    q += sp(x0, y1 + rb, y2 - rb) + ball(x0, y1, rb) + ball(x0, y2, rb) + L(x0 - 76, y1 + 8, '小球 1', C.ink, 'end') + L(x0 - 76, y2 + 8, '小球 2', C.ink, 'end');
+    if (withT) q += line(x0, y1 - rb, x0, 60, { w: 1.4, color: '#9A9A9A' }) + force(x0 + 8, y1 - 4, x0 + 8, y1 - 82) + dot(x0 + 8, y1 - 4, 3) + L(x0 + 22, y1 - 52, 'T', C.force);
+    // 小球 1: mg(下、重心から)、ks(下)
+    q += force(x0 - 8, y1, x0 - 8, y1 + 56) + dot(x0 - 8, y1, 3) + L(x0 - 20, y1 + 76, 'mg', C.force, 'end');
+    q += force(x0 + 8, y1 + 4, x0 + 8, y1 + 66) + dot(x0 + 8, y1 + 4, 3) + L(x0 + 22, y1 + 62, 'ks', C.force);
+    // 小球 2: mg(下)、ks(上)
+    q += force(x0 - 8, y2, x0 - 8, y2 + 56) + dot(x0 - 8, y2, 3) + L(x0 - 20, y2 + 76, 'mg', C.force, 'end');
+    q += force(x0 + 8, y2 - 4, x0 + 8, y2 - 66) + dot(x0 + 8, y2 - 4, 3) + L(x0 + 22, y2 - 40, 'ks', C.force);
     return q;
   };
   s += panel(130, true) + panel(400, false);
-  s += accel(500, 110, 500, 190) + L(514, 162, T`a_1`, C.force) + L(500, 346, T`a_2 = 0`, C.force, 'middle');          // 小球 1 は下向きに a₁、小球 2 は a₂ = 0
+  s += accel(500, 110, 500, 190) + L(514, 162, T`a_1`, C.force) + L(500, 346, T`a_2 = 0`, C.force, 'middle');
   return figure(560, 450, s);
 };
 
@@ -165,7 +166,7 @@ const figPulley = ({ theta = 60, move = false } = {}) => {
 const body = [
   // ---------- 1 ----------
   qa('1 (a)', {
-    genshou: [fig(figCircle({ vLab: T`2.0\ \mathrm{m/s}` }), { cap: '半径 $5.0\\ \\mathrm{m}$、速さ $2.0\\ \\mathrm{m/s}$ の等速円運動(質量 $10\\ \\mathrm{kg}$)。速度は円の接線方向、加速度は中心向き' })],
+    genshou: [fig(figCircle({ vLab: T`2.0\ \mathrm{m/s}`, withF: true }), { cap: '半径 $5.0\\ \\mathrm{m}$、速さ $2.0\\ \\mathrm{m/s}$ の等速円運動(質量 $10\\ \\mathrm{kg}$)。速度は円の接線方向、物体にはたらく力 $F$ と加速度 $a$ は中心向き(力は物体と糸の接触点から描く)' })],
     kaihou: p('[[角速度 ω]] → 速さ・半径・角速度の関係 $v = r\\omega$.'),
     tate: [head('円運動の関係式', '$\\omega$:角速度'), eq(T`v = r\omega`)],
     keisan: eq(T`\omega = \frac{v}{r} = \frac{2.0}{5.0}`),
@@ -217,7 +218,7 @@ const body = [
 
   // ---------- 3 ----------
   qa('3 (1)', {
-    genshou: [fig(figConical(), { cap: '小球とともに回る観測者から見た力:糸の張力 $S$(糸に沿って p へ)、重力 $mg$、遠心力 $mr\\omega^2$(外向き、朱)' }),
+    genshou: [fig(figConical(), { cap: '小球とともに回る観測者から見た力:糸の張力 $S$(糸に沿って p へ。糸の線から少しずらして描く)、重力 $mg$、遠心力 $mr\\omega^2$(外向き、朱)' }),
       p('小球は水平面内で半径 $r$ の等速円運動をする. 小球とともに回る観測者から見ると、小球は静止していて、力がつりあっている.')],
     kaihou: p('[[小球とともに回転する立場]] → 重力・張力・遠心力の 3 力のつりあい → [[水平方向と鉛直方向についてそれぞれ小球にはたらく力のつりあい]].'),
     tate: [head('力のつりあい(小球とともに回る観測者から見て)', '$S$:糸の張力、$mr\\omega^2$:遠心力'),
@@ -254,27 +255,27 @@ const body = [
 
   // ---------- 4 ----------
   qa('4 (1)', {
-    genshou: [fig(figQuarter(), { cap: '点 A から初速 0 ですべり、B を通る(点 B を含む水平面を、位置エネルギーの基準にする)' }),
+    genshou: [fig(figQuarter(), { cap: '点 A(止)から初速 0 ですべり、B を通る(速さ $v$、右向き)。B で小球が受ける力は $N_1$(上向き)と $mg$(下向き)で、加速度は中心 O 向き(上向き)' }),
       p('面はなめらか. 小球が受ける力のうち、仕事をするのは重力だけ.')],
-    kaihou: p('[[なめらかな円筒の内面]]、[[初速 0 ですべらせる]] → 垂直抗力は仕事をしない → 力学的エネルギー保存則(A と B).'),
+    kaihou: p('[[なめらかな円筒の内面]]、[[初速 0 ですべらせる]] → 垂直抗力は仕事をしない → 力学的エネルギー保存則(A と B). B を含む水平面を、位置エネルギーの基準にする.'),
     tate: [head('力学的エネルギー保存則(B を含む水平面が基準)'),
-      eq(T`${U('0 + mgr')}_{\displaystyle\text{A(止、高さ }r\text{)}} = ${U(T`\frac{1}{2}mv^2 + 0`)}_{\displaystyle\text{B(速さ }v\text{)}}`)],
-    keisan: eq(T`v^2 = 2gr`),
+      eq(T`${U(T`\frac{1}{2}m\cdot0^2 + mgr`)}_{\displaystyle\text{A(止、高さ }r\text{)}} = ${U(T`\frac{1}{2}mv^2 + mg\cdot0`)}_{\displaystyle\text{B(速さ }v\text{、高さ }0\text{)}}`)],
+    keisan: eq(T`mgr = \frac{1}{2}mv^2 \quad\Rightarrow\quad v^2 = 2gr`),
     ans: eq(T`v = \sqrt{2gr}`, { ther: true }),
     gimmi: p('自由落下で $r$ だけ落ちた速さ $\\sqrt{2gr}$ と同じ.'),
   }),
   qa('(2)', {
-    genshou: p('B の直前は円運動の一部(半径 $r$). 小球とともに円運動する観測者から見ると、小球は重力 $mg$、垂直抗力 $N_1$、遠心力 $m\\frac{v^2}{r}$ を受けてつりあう(図).'),
-    kaihou: p('[[点 B を通過する直前]] → まだ円運動の途中 → 小球とともに運動する観測者から見て、力のつりあい(鉛直方向).'),
-    tate: [head('力のつりあい(鉛直方向。上向きを正)', '$N_1$:B の直前の垂直抗力'),
-      eq(T`${U('N_1')}_{\displaystyle\text{垂直抗力(上向き)}} - ${U('mg')}_{\displaystyle\text{重力(下向き)}} - ${U(T`m\frac{v^2}{r}`)}_{\displaystyle\text{遠心力(下向き)}} = 0`)],
+    genshou: p('B の直前は円運動の一部(半径 $r$)で、速さは $v$. 小球の加速度は、円の中心 O 向き(上向き)の向心加速度 $a = \\frac{v^2}{r}$.'),
+    kaihou: p('[[点 B を通過する直前]] → まだ円運動の途中 → 円運動の運動方程式(向心方向 = 上向きを正).'),
+    tate: [head('運動方程式(上向きを正)', '$N_1$:B の直前の垂直抗力'),
+      eq(T`${U(T`m\frac{v^2}{r}`)}_{\displaystyle\text{質量 × 向心加速度}} = ${U('N_1')}_{\displaystyle\text{垂直抗力(上向き)}} - ${U('mg')}_{\displaystyle\text{重力(下向き)}}`)],
     keisan: eq(T`N_1 = mg + m\frac{2gr}{r}`, { lead: '(1) の $v^2 = 2gr$ を代入して' }),
     ans: eq(T`N_1 = 3mg`, { ther: true }),
     gimmi: p('静止しているときの垂直抗力 $mg$ より大きい. 円運動のぶん、面に強く押しつけられる.'),
   }),
   qa('(3)', {
-    genshou: p('B を過ぎると、水平面上の直線運動になる(円運動ではない).'),
-    kaihou: p('[[点 B を通過した直後]]、[[水平面上を直線運動]] → 遠心力はなく、鉛直方向の力のつりあい.'),
+    genshou: p('B を過ぎると、水平面上の直線運動になる(円運動ではない). 鉛直方向には動かない(加速度 0).'),
+    kaihou: p('[[点 B を通過した直後]]、[[水平面上を直線運動]] → 鉛直方向の加速度は 0 → 鉛直方向の力のつりあい.'),
     tate: [head('力のつりあい(鉛直方向)', '$N_2$:B の直後の垂直抗力'), eq(T`${U('N_2')}_{\displaystyle\text{垂直抗力(上向き)}} - ${U('mg')}_{\displaystyle\text{重力(下向き)}} = 0`)],
     keisan: '—',
     ans: eq(T`N_2 = mg`, { ther: true }),
@@ -283,20 +284,20 @@ const body = [
 
   // ---------- 5 ----------
   qa('5 (1)', {
-    genshou: [fig(figHemi(), { cap: '点 A(頂点)から点 P(角 $\\theta$)まですべる。P で、小球とともに動く観測者から見た力(重力 $mg$、垂直抗力 $N$、遠心力 $m\\frac{v^2}{R}$)' }),
+    genshou: [fig(figHemi(), { cap: '点 A(頂点。止)から点 P(角 $\\theta$)まですべる。P で、小球は速さ $v$ で面に沿って下り、重力 $mg$ と垂直抗力 $N$ を受ける。加速度 $a$ は中心 O 向き' }),
       p('A は球の頂点で、P は、中心 O から見て鉛直から角 $\\theta$ の位置. A から P までは、$R(1 - \\cos\\theta)$ だけ下がる.')],
     kaihou: p('[[なめらかな半球の頂点 A から初速 0]] → 面からの垂直抗力は仕事をしない → 力学的エネルギー保存則(A と P). 床を位置エネルギーの基準にする.'),
     tate: [head('力学的エネルギー保存則(床が基準)'),
-      eq(T`${U('0 + mgR')}_{\displaystyle\text{A(止、高さ }R\text{)}} = ${U(T`\frac{1}{2}mv^2 + mgR\cos\theta`)}_{\displaystyle\text{P(速さ }v\text{)}}`)],
-    keisan: eq(T`v^2 = 2gR(1 - \cos\theta)`),
+      eq(T`${U(T`\frac{1}{2}m\cdot0^2 + mgR`)}_{\displaystyle\text{A(止、高さ }R\text{)}} = ${U(T`\frac{1}{2}mv^2 + mgR\cos\theta`)}_{\displaystyle\text{P(速さ }v\text{)}}`)],
+    keisan: eq(T`mgR(1 - \cos\theta) = \frac{1}{2}mv^2 \quad\Rightarrow\quad v^2 = 2gR(1 - \cos\theta)`),
     ans: eq(T`v = \sqrt{2gR(1 - \cos\theta)}`, { ther: true }),
     gimmi: p('$\\theta = 0$ で $v = 0$(頂点で静止). $\\theta$ が大きいほど速い.'),
   }),
   qa('(2)', {
-    genshou: p('小球とともに動く観測者から見て、P では OP 方向に、$mg\\cos\\theta$(重力の成分、内向き)、$N$(外向き)、遠心力(外向き)がつりあう.'),
-    kaihou: p('[[点 P で面が小球に及ぼす力の大きさ N]] → OP 方向(半径方向)の力のつりあい. 遠心力 $m\\frac{v^2}{R}$ を加える.'),
-    tate: [head('半径方向の力のつりあい(O から P の向きを正)', '$N$:垂直抗力'),
-      eq(T`${U('mg\\cos\\theta')}_{\\displaystyle\\text{重力の成分(内向き)}} - ${U('N')}_{\\displaystyle\\text{垂直抗力(外向き)}} - ${U(T`m\frac{v^2}{R}`)}_{\displaystyle\text{遠心力(外向き)}} = 0`.replace(/\\\\/g, '\\'))],
+    genshou: p('P の小球は円運動の一部(半径 $R$)で、加速度は中心 O 向きの向心加速度 $a = \\frac{v^2}{R}$. 小球が受ける力のうち、O 向きの成分は $mg\\cos\\theta$(重力の成分)、O と反対向きは $N$.'),
+    kaihou: p('[[点 P で面が小球に及ぼす力の大きさ N]] → 円運動の運動方程式(向心方向 = O 向きを正).'),
+    tate: [head('運動方程式(O 向きを正)', '$N$:垂直抗力'),
+      eq(T`${U(T`m\frac{v^2}{R}`)}_{\displaystyle\text{質量 × 向心加速度}} = ${U('mg\\cos\\theta')}_{\\displaystyle\\text{重力の成分(O 向き)}} - ${U('N')}_{\\displaystyle\\text{垂直抗力(O と反対向き)}}`.replace(/\\\\/g, '\\'))],
     keisan: eq(T`N = mg\cos\theta - m\frac{2gR(1 - \cos\theta)}{R} = (3\cos\theta - 2)\,mg`, { lead: '(1) の $v^2$ を代入して' }),
     ans: eq(T`N = (3\cos\theta - 2)\,mg`, { ther: true }),
     gimmi: p('$\\theta = 0$ で $N = mg$(頂点で静止のとき). $\\theta$ が大きいほど $N$ は小さい.'),
@@ -308,7 +309,6 @@ const body = [
     keisan: eq(T`3\cos\theta_0 = 2`),
     ans: eq(T`\cos\theta_0 = \frac{2}{3}`, { ther: true }),
     gimmi: p('$\\theta_0 \\approx 48^\\circ$. $0 < \\cos\\theta_0 < 1$ を満たす.'),
-    note: note('別解:半径方向の運動方程式 $m\\frac{v^2}{R} = mg\\cos\\theta - N$ から、同じ式が得られる.'),
   }),
 
   // ---------- 6 ----------
