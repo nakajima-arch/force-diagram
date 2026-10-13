@@ -51,10 +51,10 @@ const figForce = ({ kind = 'static', mass = 'm', name = 'A' } = {}) => {
   // 垂直抗力 N と摩擦力(接触面から。N は斜面の上側にずらす)
   const Pn = at(F, U, 30), Pf = at(F, U, -34);
   const tipN = at(Pn, N, g * Math.cos(th)), fl = kind === 'sliding' ? g * 0.25 : g * 0.5, tipF = at(Pf, U, fl);
-  s += force(...Pn, ...tipN) + dot(...Pn, 3) + force(...Pf, ...tipF) + dot(...Pf, 3);
+  s += force(...Pn, ...tipN, { color: C.compB }) + dot(...Pn, 3, C.compB) + force(...Pf, ...tipF, { color: C.compA }) + dot(...Pf, 3, C.compA);   // 垂直な力は青、斜面に沿う力は朱
   // ラベル(矢印と同じ色)
-  s += L(tipN, 8, -2, 'N', C.force);
-  s += L(tipF, 4, 22, kind === 'sliding' ? T`\frac{\mu}{2}N` : kind === 'uniform' ? T`\mu_B N` : 'f', C.force);
+  s += L(tipN, 8, -2, 'N', C.compB);
+  s += L(tipF, 4, 22, kind === 'sliding' ? T`\frac{\mu}{2}N` : kind === 'uniform' ? T`\mu_B N` : 'f', C.compA);
   s += L(tipG, 8, 18, T`${mass}g`, C.force);
   s += L(tipS, -8, 14, T`${mass}g\sin\theta`, C.compA, 'end');
   s += L(tipC, 8, 20, T`${mass}g\cos\theta`, C.compB);

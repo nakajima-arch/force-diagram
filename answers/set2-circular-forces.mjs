@@ -1,4 +1,4 @@
-// 2026 円運動・力のつりあい・運動方程式の問題集(大問1〜8)の模範解答。
+// 高２ 物理基礎 ２学期中間試験(円運動・力のつりあい・運動方程式、大問1〜8)の解答解説。
 // 問題集に印刷されている解答と照合済み(吟味に「印刷の解答と一致」と書かない。照合結果は報告で伝える)。
 // 実行: node answers/set2-circular-forces.mjs [none]
 import fs from 'node:fs';
@@ -93,7 +93,7 @@ const figThree = () => {
   s += force(x + 18, ys[1] - rs[1], x + 18, ys[1] - rs[1] - 36) + L(x + 30, ys[1] - rs[1] - 22, T`T_1`, C.force);
   s += force(x + 18, ys[1] + rs[1], x + 18, ys[1] + rs[1] + 36) + L(x + 30, ys[1] + rs[1] + 34, T`T_2`, C.force);
   s += force(x + 18, ys[2] - rs[2], x + 18, ys[2] - rs[2] - 36) + L(x + 30, ys[2] - rs[2] - 22, T`T_2`, C.force);
-  s += accel(330, 330, 330, 230) + L(344, 290, 'a', C.force);
+  ys.forEach((y, i) => { s += accel(300, y + 40, 300, y - 40) + L(316, y + 8, 'a', C.force); });          // 加速度は物体ごと(上向きが正)
   return figure(420, 580, s);
 };
 
@@ -115,23 +115,23 @@ const figSpring2 = () => {
     return q;
   };
   s += panel(130, true) + panel(400, false);
-  s += accel(500, 150, 500, 230) + L(514, 202, T`a_1`, C.force);
+  s += accel(500, 110, 500, 190) + L(514, 162, T`a_1`, C.force) + L(500, 346, T`a_2 = 0`, C.force, 'middle');          // 小球 1 は下向きに a₁、小球 2 は a₂ = 0
   return figure(560, 450, s);
 };
 
 /** 大問8: 斜面の A と、滑車 P で結ばれた B。斜面は右上がり(問題の図と同じ)、滑車は斜面の上端。A が受ける力(静止) */
-const figPulley = ({ theta = 60 } = {}) => {
+const figPulley = ({ theta = 60, move = false } = {}) => {
   const rad = (theta * Math.PI) / 180;
   const U = [Math.cos(rad), -Math.sin(rad)];       // 斜面を上る向き(右上)
   const Nv = [-Math.sin(rad), -Math.cos(rad)];     // 斜面から外向き(左上)
   const at = (P, v, k) => [P[0] + v[0] * k, P[1] + v[1] * k];
-  const O = [50, 360], len = 300, E = at(O, U, len);
+  const O = [50, 360], len = 300, E = at(O, U, len), hang = Math.min(130, O[1] - E[1] - 50);
   let s = `<polygon points="${O.join(',')} ${E.join(',')} ${E[0]},${O[1]}" fill="#EDEDED"/>`;
   s += line(O[0] - 30, O[1], E[0] + 120, O[1], { color: C.wall, w: 2.4 }) + line(...O, ...E, { color: C.wall, w: 2.6 });
   s += arc(O[0], O[1], 44, 0, theta) + L(O[0] + 52, O[1] - 8, T`\theta`);
   // 滑車 P と、B(鉛直につるす)
   s += circ(...E, 12, { w: 2.2 }) + L(E[0] + 2, E[1] - 20, 'P', C.ink, 'middle');
-  s += line(E[0] + 12, E[1], E[0] + 12, E[1] + 130, { w: 1.8 }) + box(E[0] - 8, E[1] + 130, 40, 36) + L(E[0] + 12, E[1] + 192, 'B', C.ink, 'middle');
+  s += line(E[0] + 12, E[1], E[0] + 12, E[1] + hang, { w: 1.8 }) + box(E[0] - 8, E[1] + hang, 40, 36) + L(E[0] + 12, E[1] + hang + 62, 'B', C.ink, 'middle');
   // 物体 A(斜面上。左上の面)
   const F = at(O, U, 150), w = 70, h = 40, a = at(F, U, -w / 2), b = at(F, U, w / 2);
   s += `<polygon points="${[a, b, at(b, Nv, h), at(a, Nv, h)].map((q) => q.join(',')).join(' ')}" fill="#fff" stroke="${C.ink}" stroke-width="2.2"/>`;
@@ -146,9 +146,16 @@ const figPulley = ({ theta = 60 } = {}) => {
   s += arrow(...Cc, ...tipS, { color: C.compA, w: 2.4 }) + arrow(...Cc, ...tipC, { color: C.compB, w: 2.4 }) + dot(...Cc, 3, C.force);
   const Pn = at(F, U, -10), Pt = at(F, U, w / 2 - 6), Pf = at(F, U, 16);
   const tipN = at(Pn, Nv, 70), tipT = at(Pt, U, 56), tipF = at(Pf, U, -44);
-  s += force(...Pn, ...tipN) + dot(...Pn, 3) + force(...Pt, ...tipT) + dot(...Pt, 3) + force(...Pf, ...tipF) + dot(...Pf, 3);
-  s += L(tipN[0] - 10, tipN[1] - 6, 'N', C.force, 'end') + L(tipT[0] + 12, tipT[1] - 6, 'T', C.force) + L(tipF[0] + 12, tipF[1] + 20, 'f', C.force);
+  s += force(...Pn, ...tipN, { color: C.compB }) + dot(...Pn, 3, C.compB) + force(...Pt, ...tipT, { color: C.compA }) + dot(...Pt, 3, C.compA) + force(...Pf, ...tipF, { color: C.compA }) + dot(...Pf, 3, C.compA);   // 斜面に垂直な力(青)、斜面に沿う力(朱)
+  s += L(tipN[0] - 10, tipN[1] - 6, 'N', C.compB, 'end') + L(tipT[0] + 12, tipT[1] - 6, 'T', C.compA) + L(tipF[0] + 12, tipF[1] + 20, move ? T`\mu N` : 'f', C.compA);
   s += L(Cc[0] + 12, Cc[1] + g + 8, 'mg', C.force);
+  if (move) {
+    const Aa = at(at(Cc, Nv, 56), U, -10);                                    // A の加速度(斜面を上る向き)
+    s += accel(...Aa, ...at(Aa, U, 70)) + L(...at(Aa, U, 70).map((v, i) => v + (i ? -10 : 14)), 'a', C.force);
+    const bx = E[0] + 12, by = E[1] + hang + 18;                                     // B の力(重力 mg 下、張力 T 上)と加速度 a(下)
+    s += force(bx - 12, by, bx - 12, by - 56) + L(bx - 20, by - 36, T`T'`, C.force, 'end') + force(bx + 12, by, bx + 12, by + 56) + dot(bx + 12, by, 3) + L(bx + 20, by + 58, 'mg', C.force);
+    s += accel(bx + 60, by - 20, bx + 60, by + 50) + L(bx + 76, by + 30, 'a', C.force);
+  }
   s += L(tipS[0] - 8, tipS[1] + 28, T`mg\sin\theta`, C.compA, 'end');
   s += L(tipC[0] + 2, tipC[1] + 44, T`mg\cos\theta`, C.compB, 'end');
   return figure(520, 470, `<g transform="translate(50,0)">${s}</g>`);
@@ -306,7 +313,7 @@ const body = [
 
   // ---------- 6 ----------
   qa('6 (1)', {
-    genshou: [fig(figThree(), { cap: '小球 A, B, C(質量 $m$, $2m$, $3m$)を糸でつなぎ、A を力 $F$ で鉛直上向きに引き上げる。上向きを正とし、全体の加速度は $a$' }),
+    genshou: [fig(figThree(), { cap: '小球 A, B, C(質量 $m$, $2m$, $3m$)を糸でつなぎ、A を力 $F$ で鉛直上向きに引き上げる。上向きを正とし、A, B, C それぞれの加速度は同じ $a$' }),
       p('小球 C の質量は $3m$.')],
     kaihou: p('[[小球 C にはたらく重力の大きさ]] → 重力 = 質量 × $g$.'),
     tate: '—',
@@ -403,7 +410,8 @@ const body = [
     gimmi: p('$0 < \\mu_0 < 1$ で、もっともらしい. $\\theta = 60^\\circ$ では、(3) の $f = 0.13\\,mg$ と、最大摩擦力 $\\mu_0 N = 0.41 \\times 0.5\\,mg = 0.21\\,mg$ を比べると $f$ は最大値より小さく、静止できる.'),
   }),
   qa('(5)', {
-    genshou: p('$\\theta = 30^\\circ$ のとき、A は斜面をすべり上がり、B は下がる. 糸は伸び縮みしないので、A と B の加速度の大きさは等しい(共通の加速度 $a$). 動摩擦力は A の運動と逆(斜面を下る向き).'),
+    genshou: [fig(figPulley({ theta: 30, move: true }), { cap: '$\\theta = 30^\\circ$。A は斜面を上る向きに、B は下向きに、同じ大きさ $a$ の加速度で動く(加速度は物体ごとに描く)。斜面に沿う力は朱、垂直な力は青' }),
+      p('$\\theta = 30^\\circ$ のとき、A は斜面をすべり上がり、B は下がる. 糸は伸び縮みしないので、A と B の加速度の大きさは等しい(共通の加速度 $a$). 動摩擦力は A の運動と逆(斜面を下る向き).')],
     kaihou: p('[[物体 A は斜面を一定の加速度ですべり上がった]]、[[A と B に共通な加速度の大きさ]] → A, B それぞれの運動方程式を立て、$T\'$ を消去する.'),
     tate: [head('運動方程式(A:斜面を上る向きを正、B:鉛直下向きを正)', "$T'$:糸の張力、$a$:加速度"),
       eq(T`\mathrm{A}:\ ma = T' - mg\sin30^\circ - \mu\,mg\cos30^\circ`, { no: '①' }),
@@ -415,7 +423,7 @@ const body = [
 ].join('\n');
 
 const html = page({
-  title: '2026 円運動・力のつりあい・運動方程式の問題集(大問1〜8)模範解答',
+  title: '高２ 物理基礎　２学期中間試験・解答解説',
   lead: '数値計算の指示:$\\sqrt{2} = 1.41$、$\\sqrt{3} = 1.73$、$\\sqrt{5} = 2.23$。文字計算は分数、数値計算は小数で答え、答えには [ ] で単位を書く.',
   body,
 });

@@ -1,12 +1,12 @@
-// 2026 運動量・衝突の問題集(大問1, 2, 3, 5)の模範解答。大問4(P が Q の上をすべる)は answers/2026-sample-4.mjs。
+// 高２ 物理基礎 ２学期中間試験(運動量・衝突、大問1〜5)の解答解説。
 // 実行: node answers/set1-impulse-collision.mjs        → answers/set1-impulse-collision.html(途中式つき)
 //       node answers/set1-impulse-collision.mjs none   → …none.html(答案だけ)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { C, tex, arrow, accel, force, line, box, ball, dot, jp, curve, circ, figure, FS, JS } from '../tools/draw.mjs';
-import { figC } from '../tools/figures.mjs';
-import { setCalc, page, qa, head, eq, p, note, fig } from '../tools/answer.mjs';
+import { C, tex, arrow, accel, force, line, box, ball, dot, floor, jp, curve, circ, figure, FS, JS } from '../tools/draw.mjs';
+import { figA, figC, figD } from '../tools/figures.mjs';
+import { setCalc, page, qa, head, eq, p, note, check, fig } from '../tools/answer.mjs';
 
 const MODE = process.argv[2] ?? 'show';
 setCalc(MODE);
@@ -17,12 +17,12 @@ const L = (x, y, src, color = C.ink, anchor = 'start') => tex(x, y, src, { color
 // ============ 図 ============
 /** 大問1(1): ボールとバット。前は右へ 30 m/s、後は左へ 40 m/s。右向きを正とする */
 const figBat = () => {
-  let s = jp(24, 30, '衝突前', { color: C.label }) + jp(24, 130, '衝突後', { color: C.label });
-  s += line(300, 8, 300, 156, { w: 8, color: '#8A8A8A' });                               // バット(側面)
-  s += ball(150, 66, 14) + arrow(168, 66, 252, 66, { w: 2.2 }) + L(210, 50, T`30\ \mathrm{m/s}`, C.ink, 'middle');
-  s += ball(250, 126, 14) + arrow(230, 126, 132, 126, { w: 2.2 }) + L(182, 110, T`40\ \mathrm{m/s}`, C.ink, 'middle');
-  s += arrow(24, 168, 100, 168, { w: 1.8 }) + jp(108, 175, '正の向き', { size: JS });
-  return figure(340, 190, s);
+  let s = jp(10, 34, '衝突前', { color: C.label }) + jp(10, 150, '衝突後', { color: C.label });
+  s += line(420, 8, 420, 176, { w: 9, color: '#8A8A8A' });                               // バット(側面)
+  s += ball(120, 80, 15) + arrow(140, 80, 340, 80, { w: 3.4 }) + L(240, 60, T`30\ \mathrm{m/s}`, C.ink, 'middle');     // 右向き
+  s += ball(360, 140, 15) + arrow(338, 140, 138, 140, { w: 3.4 }) + L(238, 120, T`40\ \mathrm{m/s}`, C.ink, 'middle'); // 左向き
+  s += arrow(10, 200, 110, 200, { w: 2.6 }) + jp(118, 207, '右向きを正', { size: JS });
+  return figure(450, 220, s);
 };
 
 /** 大問1(4): 運動量ベクトル。力積 I = p' - p(同じ点から p, p' を描き、p の先から p' の先へ I) */
@@ -37,28 +37,32 @@ const figVec = () => {
 };
 
 /** 2物体の一直線上の衝突: 前後の速度の矢印(長さは速さに比例。左向きは負) */
-const figColl = ({ names, masses, before, after, labelsB, labelsA }) => {
+const figColl = ({ names, masses, before, after, labelsB, labelsA, scale = 30 }) => {
+  const len = (v) => Math.max(56, Math.abs(v) * scale);
   const draw = (y, vs, labs, title) => {
-    let s = jp(8, y - 26, title, { color: C.label });
-    const xs = [150, 330];
+    let s = jp(8, y - 30, title, { color: C.label });
+    const xs = [200, 440];
     vs.forEach((v, i) => {
-      s += circ(xs[i], y, 18) + L(xs[i], y + 7, names[i], C.ink, 'middle') + L(xs[i], y + 46, masses[i], C.ink, 'middle');
-      if (v !== 0) s += arrow(xs[i] + (v > 0 ? 24 : -24), y - 28, xs[i] + (v > 0 ? 24 : -24) + v, y - 28, { w: 2.2 }) + L(xs[i] + (v > 0 ? 24 : -24) + v / 2, y - 40, labs[i], C.ink, 'middle');
+      s += circ(xs[i], y, 20) + L(xs[i], y + 8, names[i], C.ink, 'middle') + L(xs[i], y + 52, masses[i], C.ink, 'middle');
+      if (v !== 0) {
+        const dir = v > 0 ? 1 : -1, x0 = xs[i] + dir * 24, x1 = x0 + dir * len(v);
+        s += arrow(x0, y - 8, x1, y - 8, { w: 3.4 }) + L((x0 + x1) / 2, y - 24, labs[i], C.ink, 'middle');
+      }
     });
     return s;
   };
-  return figure(440, 270, draw(70, before, labelsB, '衝突前') + draw(190, after, labelsA, '衝突後') + arrow(8, 258, 70, 258, { w: 1.8 }) + jp(78, 265, '正の向き', { size: JS }));
+  return figure(640, 300, draw(86, before, labelsB, '衝突前') + draw(210, after, labelsA, '衝突後') + arrow(8, 284, 100, 284, { w: 2.6 }) + jp(108, 291, '正の向き', { size: JS }));
 };
 
 /** 大問2(2)(3): ロケットの分離(前: 一体で速度 v、後: 頭部 A は v_A、尾部 B は v_B) */
 const figRocket = () => {
   let s = jp(8, 30, '分離前', { color: C.label }) + jp(8, 130, '分離後', { color: C.label });
   const body = (x, y, w, name) => `<rect x="${x}" y="${y}" width="${w}" height="30" fill="#fff" stroke="${C.ink}" stroke-width="2.2"/>` + L(x + w / 2, y + 22, name, C.ink, 'middle');
-  s += body(140, 50, 90, 'B') + body(230, 50, 44, 'A') + arrow(290, 65, 350, 65, { w: 2.2 }) + L(322, 48, 'v', C.ink, 'middle');
+  s += body(140, 50, 90, 'B') + body(230, 50, 44, 'A') + arrow(290, 65, 400, 65, { w: 3.4 }) + L(345, 46, 'v', C.ink, 'middle');
   s += body(100, 150, 90, 'B') + body(330, 150, 44, 'A');
-  s += arrow(200, 165, 245, 165, { w: 2.2 }) + L(222, 148, T`v_B`, C.ink, 'middle') + arrow(384, 165, 444, 165, { w: 2.2 }) + L(414, 148, T`v_A`, C.ink, 'middle');
+  s += arrow(200, 165, 290, 165, { w: 3.4 }) + L(245, 146, T`v_B`, C.ink, 'middle') + arrow(384, 165, 494, 165, { w: 3.4 }) + L(439, 146, T`v_A`, C.ink, 'middle');
   s += arrow(8, 205, 70, 205, { w: 1.8 }) + jp(78, 212, 'ロケットの進む向きが正', { size: JS });
-  return figure(470, 230, s);
+  return figure(520, 230, s);
 };
 
 /** 大問3(1): 床ではねかえる小球(落下 → 衝突直前 14 m/s → 直後 7.0 m/s → 上昇) */
@@ -67,9 +71,9 @@ const figBounce = () => {
   let s = line(20, fy, 380, fy, { color: C.wall, w: 3 });
   s += ball(90, 46, 12) + line(90, 60, 90, fy - 30, { w: 1.1, dash: '5 4' }) + L(60, 150, 'h', C.ink, 'end');
   s += line(72, 46, 72, fy, { w: 1.4 });
-  s += ball(110, fy - 18, 12) + arrow(110, fy - 60, 110, fy - 34, { w: 2.2 });
-  s += L(122, fy - 46, T`14\ \mathrm{m/s}`) + jp(70, 24, '落下', { color: C.label });
-  s += ball(290, fy - 18, 12) + arrow(290, fy - 34, 290, fy - 76, { w: 2.2 }) + L(302, fy - 52, T`7.0\ \mathrm{m/s}`);
+  s += ball(110, fy - 18, 12) + arrow(110, fy - 100, 110, fy - 36, { w: 3.4 });
+  s += L(124, fy - 62, T`14\ \mathrm{m/s}`) + jp(70, 24, '落下', { color: C.label });
+  s += ball(290, fy - 18, 12) + arrow(290, fy - 36, 290, fy - 106, { w: 3.4 }) + L(304, fy - 66, T`7.0\ \mathrm{m/s}`);
   s += ball(290, fy - 18 - 66, 12, { color: '#fff' }) + line(250, fy - 84, 250, fy, { w: 1.4 }) + L(240, fy - 40, T`h'`, C.ink, 'end') + jp(250, 24, 'はね上がり', { color: C.label });
   s += jp(206, 288, '上向きを正とする', { anchor: 'middle', size: JS });
   return figure(400, 300, s);
@@ -86,17 +90,29 @@ const springH = (x1, x2, y, turns = 7, amp = 9) => {
 const figCarts = () => {
   let s = line(10, 78, 500, 78, { color: C.wall, w: 2 }) + line(10, 178, 500, 178, { color: C.wall, w: 2 }) + line(10, 278, 500, 278, { color: C.wall, w: 2 });
   // ① 接触前
-  s += jp(8, 20, '①', { color: C.label }) + cart(60, 70, 90, 'A') + arrow(160, 52, 230, 52, { w: 2.2 }) + L(194, 36, T`v_0`, C.ink, 'middle');
+  s += jp(8, 20, '①', { color: C.label }) + cart(60, 70, 90, 'A') + arrow(110, 40, 230, 40, { w: 3.4 }) + L(170, 22, T`v_0`, C.ink, 'middle');
   s += springH(300, 360, 55) + cart(360, 70, 100, 'B') + L(300, 44, 'k', C.ink, 'middle');
   // ② 最大に縮んだ。速度は共通 V、縮みは x
   s += jp(8, 120, '②', { color: C.label }) + cart(170, 170, 90, 'A') + springH(260, 308, 155, 7, 10) + cart(308, 170, 100, 'B');
-  s += arrow(180, 124, 230, 124, { w: 2.2 }) + L(206, 110, 'V', C.ink, 'middle') + arrow(330, 124, 380, 124, { w: 2.2 }) + L(356, 110, 'V', C.ink, 'middle');
+  s += arrow(170, 118, 250, 118, { w: 3.4 }) + L(210, 100, 'V', C.ink, 'middle') + arrow(310, 118, 390, 118, { w: 3.4 }) + L(350, 100, 'V', C.ink, 'middle');
   s += line(260, 196, 260, 210, { w: 1.4 }) + line(300, 196, 300, 210, { w: 1.4 }) + line(260, 203, 300, 203, { w: 1.4 }) + L(280, 228, 'x', C.ink, 'middle');
   // ③ ばねから離れた後(速度は右向きを正の向きにとる)
-  s += jp(8, 220, '③', { color: C.label }) + cart(60, 270, 90, 'A') + arrow(160, 252, 220, 252, { w: 2.2 }) + L(190, 236, T`v_A'`, C.ink, 'middle');
-  s += springH(300, 360, 255) + cart(360, 270, 100, 'B') + arrow(470, 252, 530, 252, { w: 2.2 }) + L(500, 236, T`v_B'`, C.ink, 'middle');
+  s += jp(8, 220, '③', { color: C.label }) + cart(60, 270, 90, 'A') + arrow(110, 240, 210, 240, { w: 3.4 }) + L(160, 222, T`v_A'`, C.ink, 'middle');
+  s += springH(300, 360, 255) + cart(360, 270, 100, 'B') + arrow(420, 240, 520, 240, { w: 3.4 }) + L(470, 222, T`v_B'`, C.ink, 'middle');
   return figure(560, 300, s);
 };
+
+const figForce4 = () => {
+  let s = floor(70, 250, 140) + jp(78, 168, 'Q の上面', { size: JS });
+  s += box(132, 84, 56, 56) + tex(206, 104, 'm');                       // P(質量 m)
+  s += force(160, 112, 160, 196) + dot(160, 112);                        // mg: 重心から
+  s += force(178, 140, 178, 40) + dot(178, 140);                         // N: 接触面から(重力からずらす)
+  s += force(146, 140, 56, 140) + dot(146, 140);                         // μ'N: 接触面から(左向き)
+  s += tex(190, 56, 'N', { color: C.force }) + tex(172, 204, 'mg', { color: C.force }) + tex(100, 126, "\\mu' N", { anchor: 'middle', color: C.force });
+  return figure(260, 192, `<g transform="translate(-30,-24)">${s}</g>`);
+};
+
+const choice = (c) => `<div class="eq"><span class="th">∴</span><span class="f"><b>${c}</b> .</span></div>`;
 
 // ============ 答案 ============
 const body = [
@@ -146,7 +162,7 @@ const body = [
 
   // ---------------- 大問2 ----------------
   qa('2 (1)', {
-    genshou: [fig(figColl({ names: ['A', 'B'], masses: [T`2.0\ \mathrm{kg}`, T`6.0\ \mathrm{kg}`], before: [75, 30], after: [30, 45], labelsB: [T`5.0`, T`2.0`], labelsA: [T`v_A'`, T`3.0`] }), { cap: '一直線上の衝突(速さの単位は $\\mathrm{m/s}$)。A の進む向きを正とする' }),
+    genshou: [fig(figColl({ names: ['A', 'B'], masses: [T`2.0\ \mathrm{kg}`, T`6.0\ \mathrm{kg}`], before: [5.0, 2.0], after: [2.0, 3.0], labelsB: [T`5.0`, T`2.0`], labelsA: [T`v_A'`, T`3.0`], scale: 26 }), { cap: '一直線上の衝突(速さの単位は $\\mathrm{m/s}$)。A の進む向きを正とする' }),
       p('2 物体が同じ向きに進み、A が B に追いついて衝突する.')],
     kaihou: p('[[一直線上を運動する物体A, Bが衝突]] → 外力がなく、衝突の前後で運動量の和が保存する.'),
     tate: [head('運動量保存則(A の進む向きを正)', "$v_A'$:衝突後の A の速度"),
@@ -205,7 +221,7 @@ const body = [
   }),
 
   qa('(2)(a)', {
-    genshou: [fig(figColl({ names: ['P', 'Q'], masses: [T`4.0\ \mathrm{kg}`, T`m`], before: [63, -42], after: [-24, 14], labelsB: [T`21`, T`14`], labelsA: [T`3.0`, T`2.0`] }), { cap: '右向きを正とする。P は右へ $21$、Q は左へ $14$。衝突後は P は左へ $3.0$、Q は右へ $2.0$' })],
+    genshou: [fig(figColl({ names: ['P', 'Q'], masses: [T`4.0\ \mathrm{kg}`, T`m`], before: [21, -14], after: [-3.0, 2.0], labelsB: [T`21`, T`14`], labelsA: [T`3.0`, T`2.0`], scale: 8 }), { cap: '右向きを正とする。P は右へ $21$、Q は左へ $14$。衝突後は P は左へ $3.0$、Q は右へ $2.0$' })],
     kaihou: p('[[一直線上を…質点Pと…質点Qが衝突]] → 運動量保存則(右向きを正).'),
     tate: [head('運動量保存則(右向きを正)', '$m$:Q の質量'),
       eq(T`${U('4.0\\times21 + m\\times(-14)')}_{\\displaystyle\\text{衝突前}} = ${U('4.0\\times(-3.0) + m\\times2.0')}_{\\displaystyle\\text{衝突後}}`.replace(/\\\\/g, '\\'))],
@@ -251,6 +267,95 @@ const body = [
     keisan: eq(T`I = m\,v_0\left(\frac{1}{2\sqrt{3}} + \frac{\sqrt{3}}{2}\right) = m\,v_0\cdot\frac{1 + 3}{2\sqrt{3}}`),
     ans: eq(T`I = \frac{2}{\sqrt{3}}\,m\,v_0\ \left(= \frac{2\sqrt{3}}{3}\,m\,v_0\right)`, { ther: true }),
     gimmi: p(T`$I = (1 + e)\,m\,v_0\sin60^\circ = \frac{4}{3}\cdot\frac{\sqrt{3}}{2}\,m\,v_0 = \frac{2\sqrt{3}}{3}\,m\,v_0$ と一致する.`),
+  }),
+
+  // ---------------- 大問4 ----------------
+  qa('4 (1)', {
+    genshou: [fig(figForce4(), { cap: 'P が受ける力(重力は重心、垂直抗力・摩擦力は接触面から)' }),
+      p('P は Q の上面をすべる。鉛直方向には動かない.')],
+    kaihou: p('[[垂直抗力の大きさ $N$]]。P は Q の上にあり、鉛直方向には動かない → 鉛直方向の力のつりあい.'),
+    tate: [head('鉛直方向の力のつりあい'), eq('\\underbracket[0.4pt][2pt]{0}_{\\displaystyle\\text{鉛直の合力}} = \\underbracket[0.4pt][2pt]{N}_{\\displaystyle\\text{上向き}} - \\underbracket[0.4pt][2pt]{mg}_{\\displaystyle\\text{下向き}}')],
+    keisan: '—',
+    ans: eq('N = mg\\ .', { ther: true }),
+    gimmi: p('$N > 0$。すべっていても、鉛直方向の力はつりあう.'),
+  }),
+
+  qa('(2)', {
+    genshou: p('P は Q に対して右へすべるので、動摩擦力がはたらく.'),
+    kaihou: p("[[動摩擦力の大きさ $f$]]、[[動摩擦係数を $\\mu'$]] → 動摩擦力の式 $f = \\mu' N$ に (1) の $N$ を代入する."),
+    tate: [head('動摩擦力'), eq("\\underbracket[0.4pt][2pt]{f}_{\\displaystyle\\text{動摩擦力}} = \\mu' \\underbracket[0.4pt][2pt]{N}_{\\displaystyle\\text{(1) の値}}")],
+    keisan: eq("f = \\mu' m g"),
+    ans: eq("f = \\mu' m g\\ .", { ther: true }),
+    gimmi: p('向きは P の運動と逆(P には左向き)。Q には右向きに同じ大きさがはたらく.'),
+  }),
+
+  qa('(3)', {
+    genshou: p('P と Q が一体になるまで(状態1 → 状態2)の運動。外力の有無と、非保存力の仕事の有無を調べる.'),
+    kaihou: p('[[運動量と力学的エネルギーについての文章]] → 保存の条件を調べる。運動量は外力の和が 0 のとき、力学的エネルギーは保存力のみが仕事をするとき保存する.'),
+    tate: [p('水平方向:床はなめらかで外力なし → 運動量の和は保存する.'),
+      p('動摩擦力(非保存力)が仕事をする → 力学的エネルギーの和は保存しない.')],
+    keisan: '—',
+    ans: choice('ウ'),
+    gimmi: p('摩擦で熱が出る分だけ、力学的エネルギーは減る.'),
+  }),
+
+  qa('(4)', {
+    genshou: [fig(figA({ states: ['状態1', '状態2'] }), { cap: '状態1(P が Q に乗った直後)と状態2(一体)。右向きを正とする' }),
+      p('状態1 から状態2 まで、P は減速し、Q は加速する.')],
+    kaihou: p('[[力積と運動量の関係について、右向きを正として、物体P, Qそれぞれ立式]] → P、Q それぞれに立てる(動摩擦力は一定).'),
+    tate: [head('力積と運動量の関係', '右向きを正'),
+      eq("\\mathrm{P}:\\ \\underbracket[0.4pt][2pt]{m v_1 - m v_0}_{\\displaystyle\\text{運動量の変化}} = \\underbracket[0.4pt][2pt]{-\\mu' m g\\, t_1}_{\\displaystyle\\text{力積(左向き)}}", { no: '①' }),
+      eq("\\mathrm{Q}:\\ \\underbracket[0.4pt][2pt]{4m v_1 - 4m\\cdot 0}_{\\displaystyle\\text{運動量の変化}} = \\underbracket[0.4pt][2pt]{+\\mu' m g\\, t_1}_{\\displaystyle\\text{力積(右向き)}}", { no: '②' })],
+    keisan: '—',
+    ans: p('①, ②.'),
+    gimmi: p('P は左向き、Q は右向きに力積を受ける。符号が逆で、大きさが等しい.'),
+  }),
+
+  qa('(5)', {
+    genshou: p('①, ② には $t_1$ が含まれる.'),
+    kaihou: p('[[$v_1$ を $v_0$ を用いて表しなさい]] → ①, ② の和をとり、$t_1$ を消去する.'),
+    tate: p('①, ②.'),
+    keisan: eq('5m v_1 - m v_0 = 0'),
+    ans: eq('v_1 = \\frac{v_0}{5}\\ .', { lead: '①+② より $t_1$ を消去して', ther: true }),
+    gimmi: p('$0 < v_1 < v_0$。運動量保存($m v_0 = 5m v_1$)から求めた値と一致する.'),
+  }),
+
+  qa('(6)', {
+    genshou: p('(5) で $v_1$ が求まったので、①か② に代入すれば $t_1$ が求まる.'),
+    kaihou: p("[[$t_1$ を $v_0$, $\\mu'$, $g$ を用いて表しなさい]] → ② に (5) の $v_1$ を代入する."),
+    tate: p('②.'),
+    keisan: eq("\\frac{4}{5} m v_0 = \\mu' m g\\, t_1"),
+    ans: eq("t_1 = \\frac{4 v_0}{5\\mu' g}\\ .", { lead: '② に $v_1$ を代入して', ther: true }),
+    gimmi: p('$t_1 > 0$。$\\mu\'$ が大きい(摩擦が大きい)ほど $t_1$ は短い.'),
+  }),
+
+  qa('(7)', {
+    genshou: p('P、Q はそれぞれ動摩擦力による仕事を受ける。移動距離は $x_P$、$x_Q$.'),
+    kaihou: p('[[仕事とエネルギーの関係について、右向きを正として、物体P, Qそれぞれ立式]] → 動摩擦力の仕事を考えて立てる.'),
+    tate: [head('仕事とエネルギーの関係', '右向きを正'),
+      eq("\\mathrm{P}:\\ \\underbracket[0.4pt][2pt]{\\frac{1}{2} m v_1^{2} - \\frac{1}{2} m v_0^{2}}_{\\displaystyle\\text{運動エネルギーの変化}} = \\underbracket[0.4pt][2pt]{-\\mu' m g\\, x_P}_{\\displaystyle\\text{摩擦力の仕事}}", { no: '③' }),
+      eq("\\mathrm{Q}:\\ \\underbracket[0.4pt][2pt]{\\frac{1}{2}(4m) v_1^{2} - 0}_{\\displaystyle\\text{運動エネルギーの変化}} = \\underbracket[0.4pt][2pt]{+\\mu' m g\\, x_Q}_{\\displaystyle\\text{摩擦力の仕事}}", { no: '④' })],
+    keisan: '—',
+    ans: p('③, ④.'),
+    gimmi: p('P は負の仕事(減速)、Q は正の仕事(加速).'),
+  }),
+
+  qa('(8)', {
+    genshou: p('③ は $x_P$ と $v_1$ だけを含む。(5) で $v_1$ が分かっている.'),
+    kaihou: p("[[$x_P$ を $v_0$, $\\mu'$, $g$ を用いて表しなさい]] → ③ に $v_1 = \\frac{v_0}{5}$ を代入する."),
+    tate: p('③.'),
+    keisan: eq("\\frac{1}{2} m \\cdot \\frac{24}{25} v_0^{2} = \\mu' m g\\, x_P"),
+    ans: eq("x_P = \\frac{12 v_0^{2}}{25\\mu' g}\\ .", { lead: '③ に $v_1 = \\frac{v_0}{5}$ を代入して', ther: true }),
+    gimmi: p('$x_P > 0$。次の (9) で、$x_P - x_Q$ と照らして確かめる.'),
+  }),
+
+  qa('(9)', {
+    genshou: [fig(figD({ names: ['\\mathrm{P}', '\\mathrm{Q}'] }), { cap: 'P は減速($v_0 \\to v_1$)、Q は加速($0 \\to v_1$)' }),
+      p('求めるのは、Q 上を P が動いた距離 $\\ell$(Q に対する P の移動距離).')],
+    kaihou: p('[[物体Q上を物体Pが移動した距離]]、[[$v_0$, $t_1$ を用いて表しなさい]] → $v$-$t$ グラフの斜線部の面積は、P と Q の移動距離の差、つまり $\\ell$ を表す.'),
+    tate: [head('$v$-$t$ グラフの面積'), p('斜線部は、底辺 $t_1$、高さ $v_0$ の三角形.')],
+    ans: eq('\\ell = \\underbracket[0.4pt][2pt]{\\frac{1}{2} v_0 t_1}_{\\displaystyle\\text{三角形の面積}}\\ .', { ther: true }),
+    gimmi: check("④ より $x_Q = \\frac{2 v_1^{2}}{\\mu' g} = \\frac{2 v_0^{2}}{25\\mu' g}$。$x_P - x_Q = \\frac{12 - 2}{25}\\cdot\\frac{v_0^{2}}{\\mu' g} = \\frac{2 v_0^{2}}{5\\mu' g}$。これは (6) の $t_1$ を代入した $\\ell = \\frac{1}{2} v_0 t_1 = \\frac{2 v_0^{2}}{5\\mu' g}$ と一致する."),
   }),
 
   // ---------------- 大問5 ----------------
@@ -318,8 +423,8 @@ const body = [
 ].join('\n');
 
 const html = page({
-  title: '2026 運動量・衝突の問題集(大問1, 2, 3, 5)模範解答',
-  lead: '大問4(P が Q の上をすべる)は、別ファイル(2026-sample-4)にある. 大問ごとに、小問を 現象・解法・立式・計算・答・吟味 の順に書く.',
+  title: '高２ 物理基礎　２学期中間試験・解答解説',
+  lead: '運動量・衝突(大問1〜5). 大問ごとに、小問を 現象・解法・立式・計算・答・吟味 の順に書く.',
   body,
 });
 const out = path.join(path.dirname(fileURLToPath(import.meta.url)), MODE === 'show' ? 'set1-impulse-collision.html' : `set1-impulse-collision.${MODE}.html`);
