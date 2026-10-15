@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { eqTick } from '../tools/forces.mjs';
 import { C, tex, arrow, accel, force, line, box, ball, dot, jp, curve, circ, arc, vdim, figure, FS, JS } from '../tools/draw.mjs';
 import { setCalc, page, qa, head, eq, p, note, fig } from '../tools/answer.mjs';
 
@@ -36,9 +37,9 @@ const figConical = () => {
   s += line(...P, ...B, { w: 1.6, color: '#9A9A9A' }) + arc(P[0], P[1], 44, 270, 270 + 30, {}) + L(P[0] + 4, P[1] + 62, T`\theta`);
   s += ball(...B, 13);
   const k = 16, S0 = [B[0] + dir[0] * 13 - nrm[0] * k, B[1] + dir[1] * 13 - nrm[1] * k];        // 張力の矢印:糸から k だけずらして並べる
-  s += force(...S0, S0[0] + dir[0] * 74, S0[1] + dir[1] * 74) + L(S0[0] + dir[0] * 74 - 8, S0[1] + dir[1] * 74 - 6, 'S', C.force, 'end');
-  s += force(...B, B[0], B[1] + 74) + dot(...B, 3) + L(B[0] + 10, B[1] + 86, 'mg', C.force);
-  s += arrow(...B, B[0] + 80, B[1], { color: INERT, w: 2.8 }) + L(B[0] + 86, B[1] + 8, T`mr\omega^2`, INERT);
+  s += force(...S0, S0[0] + dir[0] * 80.8, S0[1] + dir[1] * 80.8) + L(S0[0] + dir[0] * 80.8 - 8, S0[1] + dir[1] * 80.8 - 6, 'S', C.force, 'end');   // S = mg / cosθ
+  s += force(...B, B[0], B[1] + 70) + dot(...B, 3) + L(B[0] + 10, B[1] + 82, 'mg', C.force);
+  s += arrow(...B, B[0] + 40.4, B[1], { color: INERT, w: 2.8 }) + L(B[0] + 48, B[1] + 8, T`mr\omega^2`, INERT);   // mrω² = mg tanθ
   return figure(360, 270, s);
 };
 
@@ -70,7 +71,7 @@ const figHemi = () => {
   s += ball(...P, rb) + L(P[0] + 22, P[1] - 22, 'P', C.ink);
   const rr = [Math.sin(th), -Math.cos(th)], tt = [Math.cos(th), Math.sin(th)];                  // 外向き、接線方向(下り)
   s += arrow(P[0] + tt[0] * 24, P[1] + tt[1] * 24, P[0] + tt[0] * 110, P[1] + tt[1] * 110, { w: 3.2 }) + L(P[0] + tt[0] * 110 + 8, P[1] + tt[1] * 110 + 4, 'v');     // 速さ(面に沿って下る向き)
-  s += force(P[0] - 8, P[1], P[0] - 8 + rr[0] * 76, P[1] + rr[1] * 76) + dot(P[0] - 8, P[1], 3) + L(P[0] - 8 + rr[0] * 76 - 6, P[1] + rr[1] * 76 - 6, 'N', C.force, 'end');   // 垂直抗力(小球の中から外向き)
+  s += force(P[0] - 8, P[1], P[0] - 8 + rr[0] * 45.5, P[1] + rr[1] * 45.5) + dot(P[0] - 8, P[1], 3) + L(P[0] - 8 + rr[0] * 45.5 - 6, P[1] + rr[1] * 45.5 - 6, 'N', C.force, 'end');   // N = (3cosθ−2)mg ≒ 0.6 mg   // 垂直抗力(小球の中から外向き)
   s += force(...P, P[0], P[1] + 76) + dot(...P, 3) + L(P[0] + 12, P[1] + 92, 'mg', C.force);
   s += accel(P[0] - rr[0] * 36 - tt[0] * 52, P[1] - rr[1] * 36 - tt[1] * 52, P[0] - rr[0] * 96 - tt[0] * 52, P[1] - rr[1] * 96 - tt[1] * 52) + L(P[0] - rr[0] * 96 - tt[0] * 52 - 10, P[1] - rr[1] * 96 - tt[1] * 52 + 6, 'a', C.force, 'end');  // 加速度(O 向き)
   return figure(460, 360, s);
@@ -78,23 +79,22 @@ const figHemi = () => {
 
 /** 大問6: 3つの小球 A, B, C を糸でつなぎ、A を力 F で引き上げる。力の長さは大きさに比例。張力は物体と糸の接触点から、加速度は物体ごと */
 const figThree = () => {
-  const x = 200, ys = [90, 230, 400], rs = [20, 26, 34], names = ['A', 'B', 'C'], ms = ['m', '2m', '3m'];
+  const x = 200, ys = [190, 370, 580], rs = [20, 26, 34], names = ['A', 'B', 'C'], ms = ['m', '2m', '3m'], u = 20;   // u = mg の長さ。a = g/4 のとき F = 7.5mg、T₁ = 6.25mg、T₂ = 3.75mg
   let s = '';
   s += line(x, ys[0] + rs[0], x, ys[1] - rs[1], { w: 1.4, color: '#B0B0B0' }) + line(x, ys[1] + rs[1], x, ys[2] - rs[2], { w: 1.4, color: '#B0B0B0' });
   ys.forEach((y, i) => { s += ball(x, y, rs[i]) + L(x - 78, y + 7, names[i], C.ink, 'end') + L(x + 36, y + 7, ms[i], C.ink, 'start'); });
-  s += jp(x + 62, 168, '糸 1', { size: JS }) + jp(x + 62, 322, '糸 2', { size: JS });
-  s += force(x, ys[0] - rs[0], x, 8) + L(x + 12, 28, 'F', C.force);
-  // 重力 mg(重心から下向き)
-  [40, 80, 120].forEach((len, i) => { s += force(x - 16, ys[i], x - 16, ys[i] + len) + dot(x - 16, ys[i], 3); });
-  s += L(x - 26, ys[0] + 58, 'mg', C.force, 'end') + L(x - 26, ys[1] + 98, '2mg', C.force, 'end') + L(x - 26, ys[2] + 138, '3mg', C.force, 'end');
-  // 張力: 糸と物体の接触点(球の上端・下端)から。糸の線から少し右へずらして並べる
-  const tl = 40, dx = 12;
-  s += force(x + dx, ys[0] + rs[0] - 4, x + dx, ys[0] + rs[0] - 4 + tl) + dot(x + dx, ys[0] + rs[0] - 4, 3) + L(x + dx + 12, ys[0] + rs[0] + 30, T`T_1`, C.force);
-  s += force(x + dx, ys[1] - rs[1] + 4, x + dx, ys[1] - rs[1] + 4 - tl) + dot(x + dx, ys[1] - rs[1] + 4, 3) + L(x + dx + 12, ys[1] - rs[1] - 24, T`T_1`, C.force);
-  s += force(x + dx, ys[1] + rs[1] - 4, x + dx, ys[1] + rs[1] - 4 + tl) + dot(x + dx, ys[1] + rs[1] - 4, 3) + L(x + dx + 12, ys[1] + rs[1] + 30, T`T_2`, C.force);
-  s += force(x + dx, ys[2] - rs[2] + 4, x + dx, ys[2] - rs[2] + 4 - tl) + dot(x + dx, ys[2] - rs[2] + 4, 3) + L(x + dx + 12, ys[2] - rs[2] - 24, T`T_2`, C.force);
-  ys.forEach((y) => { s += accel(320, y + 40, 320, y - 40) + L(336, y + 8, 'a', C.force); });
-  return figure(420, 580, s);
+  s += jp(x + 70, 288, '糸 1', { size: JS }) + jp(x + 70, 478, '糸 2', { size: JS });
+  s += force(x, ys[0] - rs[0], x, ys[0] - rs[0] - 7.5 * u) + L(x + 12, ys[0] - rs[0] - 7.5 * u + 14, 'F', C.force);
+  [1, 2, 3].forEach((k, i) => { s += force(x - 16, ys[i], x - 16, ys[i] + k * u); });                                 // 重力 mg(重心から。長さは質量に比例)
+  s += L(x - 26, ys[0] + 1 * u + 14, 'mg', C.force, 'end') + L(x - 26, ys[1] + 2 * u + 14, '2mg', C.force, 'end') + L(x - 26, ys[2] + 3 * u + 14, '3mg', C.force, 'end');
+  // 張力: 糸と物体の接触点から。T₁ = 6.25mg、T₂ = 3.75mg
+  const dx = 12;
+  s += force(x + dx, ys[0] + rs[0] - 4, x + dx, ys[0] + rs[0] - 4 + 6.25 * u) + L(x + dx + 12, ys[0] + rs[0] + 6.25 * u - 4, T`T_1`, C.force);
+  s += force(x + dx, ys[1] - rs[1] + 4, x + dx, ys[1] - rs[1] + 4 - 6.25 * u) + L(x + dx + 12, ys[1] - rs[1] + 4 - 6.25 * u + 14, T`T_1`, C.force);
+  s += force(x + dx, ys[1] + rs[1] - 4, x + dx, ys[1] + rs[1] - 4 + 3.75 * u) + L(x + dx + 12, ys[1] + rs[1] + 3.75 * u - 4, T`T_2`, C.force);
+  s += force(x + dx, ys[2] - rs[2] + 4, x + dx, ys[2] - rs[2] + 4 - 3.75 * u) + L(x + dx + 12, ys[2] - rs[2] + 4 - 3.75 * u + 14, T`T_2`, C.force);
+  ys.forEach((y) => { s += accel(330, y + 40, 330, y - 40) + L(346, y + 8, 'a', C.force); });                       // 加速度は物体ごと
+  return figure(430, 700, s);
 };
 
 /** 大問7: ばねでつながった小球 1, 2。糸をはなす前(つりあい)とはなした直後。力は小球の中から描く */
@@ -106,13 +106,13 @@ const figSpring2 = () => {
     let q = '';
     const y1 = 150, y2 = 340;
     q += sp(x0, y1 + rb, y2 - rb) + ball(x0, y1, rb) + ball(x0, y2, rb) + L(x0 - 76, y1 + 8, '小球 1', C.ink, 'end') + L(x0 - 76, y2 + 8, '小球 2', C.ink, 'end');
-    if (withT) q += line(x0, y1 - rb, x0, 60, { w: 1.4, color: '#9A9A9A' }) + force(x0 + 8, y1 - 4, x0 + 8, y1 - 82) + dot(x0 + 8, y1 - 4, 3) + L(x0 + 22, y1 - 52, 'T', C.force);
+    if (withT) q += line(x0, y1 - rb, x0, 60, { w: 1.4, color: '#9A9A9A' }) + force(x0 + 8, y1 - 4, x0 + 8, y1 - 92) + dot(x0 + 8, y1 - 4, 3) + L(x0 + 22, y1 - 52, 'T', C.force);   // T = 2mg
     // 小球 1: mg(下、重心から)、ks(下)
-    q += force(x0 - 8, y1, x0 - 8, y1 + 56) + dot(x0 - 8, y1, 3) + L(x0 - 20, y1 + 76, 'mg', C.force, 'end');
-    q += force(x0 + 8, y1 + 4, x0 + 8, y1 + 66) + dot(x0 + 8, y1 + 4, 3) + L(x0 + 22, y1 + 62, 'ks', C.force);
+    q += force(x0 - 8, y1, x0 - 8, y1 + 46) + dot(x0 - 8, y1, 3) + L(x0 - 20, y1 + 66, 'mg', C.force, 'end');
+    q += force(x0 + 8, y1 + 4, x0 + 8, y1 + 50) + dot(x0 + 8, y1 + 4, 3) + L(x0 + 22, y1 + 56, 'ks', C.force);
     // 小球 2: mg(下)、ks(上)
-    q += force(x0 - 8, y2, x0 - 8, y2 + 56) + dot(x0 - 8, y2, 3) + L(x0 - 20, y2 + 76, 'mg', C.force, 'end');
-    q += force(x0 + 8, y2 - 4, x0 + 8, y2 - 66) + dot(x0 + 8, y2 - 4, 3) + L(x0 + 22, y2 - 40, 'ks', C.force);
+    q += force(x0 - 8, y2, x0 - 8, y2 + 46) + dot(x0 - 8, y2, 3) + L(x0 - 20, y2 + 66, 'mg', C.force, 'end') + (withT ? eqTick([x0 - 8, y2 + 23], [0, 1], 1) : '');
+    q += force(x0 + 8, y2 - 4, x0 + 8, y2 - 50) + dot(x0 + 8, y2 - 4, 3) + L(x0 + 22, y2 - 30, 'ks', C.force) + (withT ? eqTick([x0 + 8, y2 - 27], [0, -1], 1) : '');   // mg = ks(つりあい)
     return q;
   };
   s += panel(130, true) + panel(400, false);
@@ -146,7 +146,8 @@ const figPulley = ({ theta = 60, move = false } = {}) => {
   const tipS = at(Cc, U, -g * Math.sin(rad)), tipC = at(Cc, Nv, -g * Math.cos(rad));
   s += arrow(...Cc, ...tipS, { color: C.compA, w: 2.4 }) + arrow(...Cc, ...tipC, { color: C.compB, w: 2.4 }) + dot(...Cc, 3, C.force);
   const Pn = at(F, U, -10), Pt = at(F, U, w / 2 - 6), Pf = at(F, U, 16);
-  const tipN = at(Pn, Nv, 70), tipT = at(Pt, U, 56), tipF = at(Pf, U, -44);
+  const lenN = move ? 78 : 45, lenT = move ? 75 : 90, lenF = move ? 15.6 : 12;   // 静止(θ=60°): N = mg/2、T = mg、f = 0.13 mg。運動(θ=30°、μ=0.2): N = 0.87mg、T' = 0.84mg、μN = 0.17mg
+  const tipN = at(Pn, Nv, lenN), tipT = at(Pt, U, lenT), tipF = at(Pf, U, -lenF);
   s += force(...Pn, ...tipN, { color: C.compB }) + dot(...Pn, 3, C.compB) + force(...Pt, ...tipT, { color: C.compA }) + dot(...Pt, 3, C.compA) + force(...Pf, ...tipF, { color: C.compA }) + dot(...Pf, 3, C.compA);   // 斜面に垂直な力(青)、斜面に沿う力(朱)
   s += L(tipN[0] - 10, tipN[1] - 6, 'N', C.compB, 'end') + L(tipT[0] + 12, tipT[1] - 6, 'T', C.compA) + L(tipF[0] + 12, tipF[1] + 20, move ? T`\mu N` : 'f', C.compA);
   s += L(Cc[0] + 12, Cc[1] + g + 8, 'mg', C.force);
@@ -154,7 +155,7 @@ const figPulley = ({ theta = 60, move = false } = {}) => {
     const Aa = at(at(Cc, Nv, 56), U, -10);                                    // A の加速度(斜面を上る向き)
     s += accel(...Aa, ...at(Aa, U, 70)) + L(...at(Aa, U, 70).map((v, i) => v + (i ? -10 : 14)), 'a', C.force);
     const bx = E[0] + 12, by = E[1] + hang + 18;                                     // B の力(重力 mg 下、張力 T 上)と加速度 a(下)
-    s += force(bx - 12, by, bx - 12, by - 56) + L(bx - 20, by - 36, T`T'`, C.force, 'end') + force(bx + 12, by, bx + 12, by + 56) + dot(bx + 12, by, 3) + L(bx + 20, by + 58, 'mg', C.force);
+    s += force(bx - 12, by, bx - 12, by - 75) + L(bx - 20, by - 36, T`T'`, C.force, 'end') + force(bx + 12, by, bx + 12, by + 90) + dot(bx + 12, by, 3) + L(bx + 20, by + 58, 'mg', C.force);   // B は下向きに加速: mg > T'
     s += accel(bx + 60, by - 20, bx + 60, by + 50) + L(bx + 76, by + 30, 'a', C.force);
   }
   s += L(tipS[0] - 8, tipS[1] + 28, T`mg\sin\theta`, C.compA, 'end');

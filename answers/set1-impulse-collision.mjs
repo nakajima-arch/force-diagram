@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { C, tex, arrow, accel, force, line, box, ball, dot, floor, jp, curve, circ, figure, FS, JS } from '../tools/draw.mjs';
+import { eqTick } from '../tools/forces.mjs';
 import { figA, figC, figD } from '../tools/figures.mjs';
 import { setCalc, page, qa, head, eq, p, note, check, fig } from '../tools/answer.mjs';
 
@@ -112,10 +113,10 @@ const figCarts = () => {
 const figForce4 = () => {
   let s = floor(70, 250, 140) + jp(78, 168, 'Q の上面', { size: JS });
   s += box(132, 84, 56, 56) + tex(206, 104, 'm');                       // P(質量 m)
-  s += force(160, 112, 160, 196) + dot(160, 112);                        // mg: 重心から
-  s += force(178, 140, 178, 40) + dot(178, 140);                         // N: 接触面から(重力からずらす)
-  s += force(146, 140, 56, 140) + dot(146, 140);                         // μ'N: 接触面から(左向き)
-  s += tex(190, 56, 'N', { color: C.force }) + tex(172, 204, 'mg', { color: C.force }) + tex(100, 126, "\\mu' N", { anchor: 'middle', color: C.force });
+  s += force(160, 112, 160, 182) + dot(160, 112) + eqTick([160, 147], [0, 1], 1);   // mg: 重心から(N と同じ長さ)
+  s += force(178, 140, 178, 70) + dot(178, 140) + eqTick([178, 105], [0, -1], 1);    // N = mg: 接触面から(重力からずらす)
+  s += force(146, 140, 129, 140) + dot(146, 140);                         // μ'N(μ' = 0.25 とした長さ): 接触面から(左向き)
+  s += tex(190, 70, 'N', { color: C.force }) + tex(172, 196, 'mg', { color: C.force }) + tex(112, 128, "\\mu' N", { anchor: 'middle', color: C.force });
   return figure(260, 192, `<g transform="translate(-30,-24)">${s}</g>`);
 };
 
