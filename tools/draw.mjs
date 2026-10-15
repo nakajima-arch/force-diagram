@@ -77,7 +77,8 @@ export function arrow(x1, y1, x2, y2, { color = C.ink, w = 2, head = null, dash 
 }
 
 /** 力の矢印。tail が作用点。太め・朱色 */
-export const force = (x1, y1, x2, y2, o = {}) => arrow(x1, y1, x2, y2, { color: C.force, w: 2.8, ...o });
+export const force = (x1, y1, x2, y2, o = {}) =>
+  arrow(x1, y1, x2, y2, { color: C.force, w: 2.8, ...o }) + (o.dot === false ? '' : `<circle cx="${x1}" cy="${y1}" r="3.4" fill="${o.color ?? C.force}"/>`);   // 根元(作用点)に●を打つ
 
 /** 加速度の矢印 ⇨(白ぬきの太い矢印)。力ではないので、力の矢印とは形で区別する */
 export function accel(x1, y1, x2, y2, { color = C.force, w = 2.2 } = {}) {

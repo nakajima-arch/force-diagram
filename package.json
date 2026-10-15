@@ -4,7 +4,8 @@
   "description": "力の図示ドリル + 中島テンプレ(物理の記述答案・図の作図)",
   "main": "data.js",
   "scripts": {
-    "figures": "node tools/build-figures.mjs"
+    "figures": "node tools/build-figures.mjs",
+    "forcedemo": "node tools/force-demos.mjs"
   },
   "repository": {
     "type": "git",
